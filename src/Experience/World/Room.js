@@ -274,6 +274,14 @@ export class Room {
         ease: "power2.inOut",
       });
     });
+    const fireflies = this.experience.world.fireflies;
+    if (fireflies) {
+      gsap.to(fireflies.uOpacity, {
+        value: this.isNight ? 1 : 0,
+        duration: 1.5,
+        ease: "power2.inOut",
+      });
+    }
   }
 
   resize() {}
