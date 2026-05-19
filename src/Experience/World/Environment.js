@@ -1,7 +1,6 @@
 import * as THREE from "three/webgpu";
 import { uniform } from "three/tsl";
 import { Experience } from "../Experience";
-import { hatchUniforms } from "../Materials/HatchedMaterial";
 
 export const spotProjectionMatrixUniform = uniform(new THREE.Matrix4());
 export const spotProjectionMatrixUniform2 = uniform(new THREE.Matrix4());
@@ -74,7 +73,6 @@ export class Environment {
     this.experience.scene.add(this.shadowCameraHelper);
 
     // Push the initial direction into the hatch uniform.
-    this.syncHatchLightDir();
 
     const folder = this.gui.addFolder("Directional Light");
     folder
@@ -89,7 +87,6 @@ export class Environment {
     const onMove = () => {
       this.directionalLightHelper.update();
       this.shadowCameraHelper.update();
-      this.syncHatchLightDir();
     };
 
     const pos = folder.addFolder("Position");
@@ -122,16 +119,6 @@ export class Environment {
 
     folder.add(this.directionalLightHelper, "visible").name("Show Helper");
     folder.add(this.shadowCameraHelper, "visible").name("Show Shadow Frustum");
-  }
-
-  syncHatchLightDir() {
-    const dir = new THREE.Vector3()
-      .subVectors(
-        this.directionalLight.position,
-        this.directionalLight.target.position,
-      )
-      .normalize();
-    hatchUniforms.lightDirectionWorld.value.copy(dir);
   }
 
   setupProjectorLight() {

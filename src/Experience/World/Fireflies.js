@@ -21,19 +21,20 @@ export class Fireflies {
     this.scene = this.experience.scene;
 
     this.cfg = {
-      count: 100,
-      spreadX: 40,
-      offsetX: 10,
-      spreadZ: 15,
-      offsetZ: -20,
-      minY: 2,
-      maxY: 3.5,
+      count: 21,
+      minX: -33,
+      maxX: 35.5,
+      minY: -13.7,
+      maxY: 20,
+      minZ: -27.5,
+      maxZ: -10,
       size: 2.0,
       driftAmount: 1.0,
+      showBox: false,
     };
 
     // Live uniforms (shader-side)
-    this.uColor = uniform(new THREE.Color(1.0, 0.7, 0.4));
+    this.uColor = uniform(new THREE.Color("#fec158"));
     this.uOpacity = uniform(0.0);
     this.uBlinkSlow = uniform(0.8);
     this.uBlinkFast = uniform(3.0);
@@ -42,19 +43,20 @@ export class Fireflies {
     this._scales = null;
 
     this._build();
+    this._buildBoxHelper();
     this._initGui();
   }
 
   _build() {
-    const { count, spreadX, offsetX, spreadZ, offsetZ, minY, maxY, size } = this.cfg;
+    const { count, minX, maxX, minY, maxY, minZ, maxZ, size } = this.cfg;
 
     this._spawnPos = new Float32Array(count * 3);
     this._scales = new Float32Array(count);
 
     for (let i = 0; i < count; i++) {
-      this._spawnPos[i * 3 + 0] = (Math.random() - 0.5) * spreadX + offsetX;
-      this._spawnPos[i * 3 + 1] = Math.random() * (maxY - minY) + minY;
-      this._spawnPos[i * 3 + 2] = (Math.random() - 0.5) * spreadZ + offsetZ;
+      this._spawnPos[i * 3 + 0] = minX + Math.random() * (maxX - minX);
+      this._spawnPos[i * 3 + 1] = minY + Math.random() * (maxY - minY);
+      this._spawnPos[i * 3 + 2] = minZ + Math.random() * (maxZ - minZ);
       this._scales[i] = Math.random();
     }
 
@@ -84,7 +86,6 @@ export class Fireflies {
     this.mesh = new THREE.InstancedMesh(geo, material, count);
     this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 
-    // Initialise matrices so they aren't at origin
     for (let i = 0; i < count; i++) {
       DUMMY.position.set(
         this._spawnPos[i * 3],
@@ -100,6 +101,27 @@ export class Fireflies {
     this.scene.add(this.mesh);
   }
 
+  _buildBoxHelper() {
+    const { minX, maxX, minY, maxY, minZ, maxZ } = this.cfg;
+    const box = new THREE.Box3(
+      new THREE.Vector3(minX, minY, minZ),
+      new THREE.Vector3(maxX, maxY, maxZ),
+    );
+    this._boxHelper = new THREE.Box3Helper(box, new THREE.Color(1.0, 0.7, 0.4));
+    this._boxHelper.visible = this.cfg.showBox;
+    this.scene.add(this._boxHelper);
+  }
+
+  _updateBoxHelper() {
+    const { minX, maxX, minY, maxY, minZ, maxZ } = this.cfg;
+    this._boxHelper.box.set(
+      new THREE.Vector3(minX, minY, minZ),
+      new THREE.Vector3(maxX, maxY, maxZ),
+    );
+    // Box3Helper doesn't auto-update its geometry — force it
+    this._boxHelper.updateMatrixWorld(true);
+  }
+
   _rebuild() {
     if (this.mesh) {
       this.mesh.geometry.dispose();
@@ -107,6 +129,7 @@ export class Fireflies {
       this.scene.remove(this.mesh);
     }
     this._build();
+    this._updateBoxHelper();
   }
 
   update() {
@@ -114,15 +137,14 @@ export class Fireflies {
 
     const { count, size, driftAmount } = this.cfg;
     const camera = this.experience.camera.instance;
-    // Match TSL time node (seconds elapsed) × 0.5
-    const t = performance.now() * 0.0005;
+    const t = performance.now() * 0.0005; // seconds × 0.5, matches TSL time × 0.5
 
     for (let i = 0; i < count; i++) {
       const sx = this._spawnPos[i * 3];
       const sy = this._spawnPos[i * 3 + 1];
       const sz = this._spawnPos[i * 3 + 2];
       const s = this._scales[i];
-      const uo = sx * 0.3 + sz * 0.7; // unique offset
+      const uo = sx * 0.3 + sz * 0.7;
 
       DUMMY.position.set(
         sx + Math.sin(t + uo) * s * 0.3 * driftAmount,
@@ -130,7 +152,7 @@ export class Fireflies {
         sz + Math.sin(t * 0.7 + uo) * s * 0.2 * driftAmount,
       );
       DUMMY.scale.setScalar(s * size);
-      DUMMY.lookAt(camera.position); // billboard toward camera
+      DUMMY.lookAt(camera.position);
       DUMMY.updateMatrix();
       this.mesh.setMatrixAt(i, DUMMY.matrix);
     }
@@ -141,16 +163,26 @@ export class Fireflies {
   _initGui() {
     const folder = this.experience.gui.addFolder("Fireflies");
 
-    // --- Geometry (rebuild on release) ---
-    const geo = folder.addFolder("Spawn");
-    geo.add(this.cfg, "count", 10, 500, 1).name("Count").onFinishChange(() => this._rebuild());
-    geo.add(this.cfg, "spreadX", 1, 80, 1).name("Spread X").onFinishChange(() => this._rebuild());
-    geo.add(this.cfg, "offsetX", -30, 30, 0.5).name("Offset X").onFinishChange(() => this._rebuild());
-    geo.add(this.cfg, "spreadZ", 1, 40, 1).name("Spread Z").onFinishChange(() => this._rebuild());
-    geo.add(this.cfg, "offsetZ", -60, 0, 0.5).name("Offset Z").onFinishChange(() => this._rebuild());
-    geo.add(this.cfg, "minY", 0, 10, 0.1).name("Min Height").onFinishChange(() => this._rebuild());
-    geo.add(this.cfg, "maxY", 0, 15, 0.1).name("Max Height").onFinishChange(() => this._rebuild());
-    geo.close();
+    // --- Spawn domain ---
+    const spawn = folder.addFolder("Spawn Domain");
+
+    const rebuildAndUpdateBox = () => {
+      this._updateBoxHelper();
+      this._rebuild();
+    };
+
+    // Show the box toggle lives here so it's obvious
+    spawn.add(this.cfg, "showBox").name("Show Box").onChange((v) => {
+      this._boxHelper.visible = v;
+    });
+
+    spawn.add(this.cfg, "count", 10, 500, 1).name("Count").onFinishChange(rebuildAndUpdateBox);
+    spawn.add(this.cfg, "minX", -60, 60, 0.5).name("Min X").onChange(() => this._updateBoxHelper()).onFinishChange(rebuildAndUpdateBox);
+    spawn.add(this.cfg, "maxX", -60, 60, 0.5).name("Max X").onChange(() => this._updateBoxHelper()).onFinishChange(rebuildAndUpdateBox);
+    spawn.add(this.cfg, "minY", -20, 20, 0.1).name("Min Y").onChange(() => this._updateBoxHelper()).onFinishChange(rebuildAndUpdateBox);
+    spawn.add(this.cfg, "maxY", -5, 20, 0.1).name("Max Y").onChange(() => this._updateBoxHelper()).onFinishChange(rebuildAndUpdateBox);
+    spawn.add(this.cfg, "minZ", -80, 20, 0.5).name("Min Z").onChange(() => this._updateBoxHelper()).onFinishChange(rebuildAndUpdateBox);
+    spawn.add(this.cfg, "maxZ", -80, 20, 0.5).name("Max Z").onChange(() => this._updateBoxHelper()).onFinishChange(rebuildAndUpdateBox);
 
     // --- Live controls ---
     const proxy = {
@@ -159,7 +191,7 @@ export class Fireflies {
       drift: this.cfg.driftAmount,
       blinkSlow: 0.8,
       blinkFast: 3.0,
-      color: "#ffb366",
+      color: "#fec158",
     };
 
     folder.add(proxy, "opacity", 0, 1, 0.01).name("Opacity").onChange((v) => (this.uOpacity.value = v));
@@ -167,7 +199,10 @@ export class Fireflies {
     folder.add(proxy, "drift", 0, 3, 0.01).name("Drift").onChange((v) => (this.cfg.driftAmount = v));
     folder.add(proxy, "blinkSlow", 0.05, 3, 0.01).name("Blink Slow").onChange((v) => (this.uBlinkSlow.value = v));
     folder.add(proxy, "blinkFast", 0.5, 10, 0.1).name("Blink Fast").onChange((v) => (this.uBlinkFast.value = v));
-    folder.addColor(proxy, "color").name("Color").onChange((v) => this.uColor.value.set(v));
+    folder.addColor(proxy, "color").name("Color").onChange((v) => {
+      this.uColor.value.set(v);
+      this._boxHelper.material.color.set(v);
+    });
 
     folder.close();
   }
@@ -177,6 +212,11 @@ export class Fireflies {
       this.mesh.geometry.dispose();
       this.mesh.material.dispose();
       this.scene.remove(this.mesh);
+    }
+    if (this._boxHelper) {
+      this._boxHelper.geometry.dispose();
+      this._boxHelper.material.dispose();
+      this.scene.remove(this._boxHelper);
     }
   }
 }

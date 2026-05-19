@@ -12,4 +12,5 @@ btn.addEventListener("click", () => {
   const goingNight = experience.world.room?.isNight ?? false;
   icon.innerHTML = goingNight ? "&#9728;" : "&#9790;";
   label.textContent = goingNight ? "Day" : "Night";
+  experience.world.raycaster?.setDayNightVolume(goingNight);
 });

@@ -5,9 +5,14 @@ export default [
     path: "/models/Room.glb",
   },
   {
+    name: "hitboxes",
+    type: "glbModel",
+    path: "/models/Hitboxes.glb",
+  },
+  {
     name: "goboTexture",
     type: "texture",
-    path: "/textures/gobo.png",
+    path: "/textures/gobo.jpg",
   },
   {
     name: "butterflyWingTexture",

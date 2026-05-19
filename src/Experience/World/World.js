@@ -1,20 +1,16 @@
 import * as THREE from "three/webgpu";
 import { Experience } from "../Experience";
-import { Character } from "./Character";
 import { Environment } from "./Environment";
-import { Background } from "./Background";
 import { Room } from "./Room";
-import { Balloons } from "./Balloons";
 import { Butterfly } from "./Butterfly";
 import { Fireflies } from "./Fireflies";
+import { Raycaster } from "./Raycaster";
 
 export class World {
   constructor() {
     this.experience = Experience.getInstance();
 
     this.experience.resources.on("ready", () => {
-      // this.character = new Character();
-      // this.background = new Background();
       this.room = new Room();
       this.environment = new Environment(); // must come before Balloons (provides directionalLight)
       this.butterflies = [
@@ -62,6 +58,7 @@ export class World {
         ),
       ];
       this.fireflies = new Fireflies();
+      this.raycaster = new Raycaster();
       // this.balloons = new Balloons();
       // this.waterPlane = new WaterPlane();
       // this.experience.outline.apply(this.experience.scene);
@@ -78,6 +75,7 @@ export class World {
     this.environment?.update();
     this.butterflies?.forEach((b) => b.update());
     this.fireflies?.update();
+    this.raycaster?.update();
     this.balloons?.update();
     this.test?.update();
     this.newTest?.update();

@@ -13,7 +13,9 @@ export class Camera {
       2.3276204297380789,
       10.9035362538756501,
     );
+    this.homePosition = this.basePosition.clone();
     this.targetPosition = new THREE.Vector3();
+    this.locked = false;
 
     this.init();
     this.setOrbitControls();
@@ -61,6 +63,8 @@ export class Camera {
       this.controls.update();
       return;
     }
+
+    if (this.locked) return;
 
     const mouse = this.experience.mouse.instance;
 
