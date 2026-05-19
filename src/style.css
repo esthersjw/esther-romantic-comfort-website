@@ -20,6 +20,39 @@ body {
   height: 100%;
 }
 
+/* Day / Night toggle */
+.day-night-btn {
+  position: fixed;
+  top: 32px;
+  right: 32px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 15px;
+  font-family: sans-serif;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+  transition: background 0.2s, transform 0.15s;
+}
+
+.day-night-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.day-night-btn__icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
 /* Modals */
 .modal {
   position: fixed;

@@ -10,7 +10,9 @@ import {
   uniform,
   time,
   mx_noise_float,
+  mix,
 } from "three/tsl";
+import gsap from "gsap";
 import { Experience } from "../Experience";
 import {
   spotProjectionMatrixUniform,
@@ -31,10 +33,13 @@ export class Room {
   }
 
   init() {
-    const uGoboStrength = uniform(0.5);
+    this.uGoboStrength = uniform(0.5);
+    const uGoboStrength = this.uGoboStrength;
     const uSwayAmount = uniform(0.008);
     const uSwaySpeed = uniform(0.2);
     const uGoboBlur = uniform(0.0);
+    this.uDayNight = uniform(0.0);
+    this.isNight = false;
 
     const items = this.experience.resources.items;
     const ordinalTextureMap = {
@@ -47,8 +52,18 @@ export class Room {
       Seventh: items.seventhTexture,
       Eighth: items.eighthTexture,
     };
+    const ordinalNightTextureMap = {
+      First: items.firstNightTexture,
+      Second: items.secondNightTexture,
+      Third: items.thirdNightTexture,
+      Fourth: items.fourthNightTexture,
+      Fifth: items.fifthNightTexture,
+      Sixth: items.sixthNightTexture,
+      Seventh: items.seventhNightTexture,
+      Eighth: items.eighthNightTexture,
+    };
 
-    Object.values(ordinalTextureMap).forEach((t) => {
+    [...Object.values(ordinalTextureMap), ...Object.values(ordinalNightTextureMap)].forEach((t) => {
       if (t) {
         t.flipY = false;
         t.generateMipmaps = false;
@@ -173,20 +188,25 @@ export class Room {
       const softGobo3 = goboSample3.oneMinus().mul(uGoboStrength).oneMinus();
 
       const ordinalTex = ordinalTextureMap[obj.name.split("_")[0]];
-      if (ordinalTex) {
+      const ordinalNightTex = ordinalNightTextureMap[obj.name.split("_")[0]];
+      if (ordinalTex && ordinalNightTex) {
+        const daySample = texture(ordinalTex, uv());
+        const nightSample = texture(ordinalNightTex, uv());
+        const blended = mix(daySample, nightSample, this.uDayNight);
+        mat.colorNode = blended.rgb.mul(softGobo.min(softGobo2).min(softGobo3));
+        mat.opacityNode = blended.a;
+        mat.transparent = true;
+        mat.alphaTest = 0.2;
+      } else if (ordinalTex) {
         const texSample = texture(ordinalTex, uv());
         mat.colorNode = texSample.rgb
-          .mul(softGobo)
-          .mul(softGobo2)
-          .mul(softGobo3);
+          .mul(softGobo.min(softGobo2).min(softGobo3));
         mat.opacityNode = texSample.a;
         mat.transparent = true;
         mat.alphaTest = 0.2;
       } else if (old.map) {
         mat.colorNode = texture(old.map, uv())
-          .mul(softGobo)
-          .mul(softGobo2)
-          .mul(softGobo3);
+          .mul(softGobo.min(softGobo2).min(softGobo3));
       } else {
         mat.color.copy(old.color);
       }
@@ -222,6 +242,38 @@ export class Room {
       .onChange((v) => {
         uGoboBlur.value = v;
       });
+    folder
+      .add({ blend: 0.0 }, "blend", 0, 1, 0.01)
+      .name("Day/Night Blend")
+      .onChange((v) => {
+        this.uDayNight.value = v;
+      });
+  }
+
+  toggleDayNight() {
+    this.isNight = !this.isNight;
+    gsap.to(this.uDayNight, {
+      value: this.isNight ? 1 : 0,
+      duration: 1.5,
+      ease: "power2.inOut",
+    });
+    gsap.to(this.experience.renderer.uContrast, {
+      value: this.isNight ? 1.0 : 1.2,
+      duration: 1.5,
+      ease: "power2.inOut",
+    });
+    gsap.to(this.uGoboStrength, {
+      value: this.isNight ? 0 : 0.5,
+      duration: 1.5,
+      ease: "power2.inOut",
+    });
+    this.experience.world.butterflies?.forEach((b) => {
+      gsap.to(b.uOpacity, {
+        value: this.isNight ? 0 : 1,
+        duration: 1.5,
+        ease: "power2.inOut",
+      });
+    });
   }
 
   resize() {}
