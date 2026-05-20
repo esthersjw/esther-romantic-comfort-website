@@ -102,7 +102,8 @@ export class Camera {
         this._touchPrevX !== null &&
         !this.locked &&
         !this.experience.world?.raycaster?.inFocus &&
-        !this.experience.raycaster?.isModalOpen
+        !this.experience.raycaster?.isModalOpen &&
+        !this.experience.world?.chalkboard?._isDrawing
       ) {
         e.preventDefault();
         const dx = e.touches[0].clientX - this._touchPrevX;

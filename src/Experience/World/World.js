@@ -6,6 +6,7 @@ import { Butterfly } from "./Butterfly";
 import { Fireflies } from "./Fireflies";
 import { Candle } from "./Candle";
 import { Raycaster } from "./Raycaster";
+import { Chalkboard } from "./Chalkboard";
 
 export class World {
   constructor() {
@@ -61,6 +62,7 @@ export class World {
       this.fireflies = new Fireflies();
       this.candle = new Candle();
       this.raycaster = new Raycaster();
+      this.chalkboard = new Chalkboard();
     });
 
     this.init();
@@ -76,6 +78,7 @@ export class World {
     this.fireflies?.update();
     this.candle?.update();
     this.raycaster?.update();
+    this.chalkboard?.update();
     this.balloons?.update();
     this.test?.update();
     this.newTest?.update();
