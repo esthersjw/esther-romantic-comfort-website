@@ -28,7 +28,7 @@ export class Camera {
     this._pinchZoom0 = 0;
     this._touchPrevX = null;
     this._touchPrevY = null;
-    this.touchDragSensitivity = 0.01;
+    this.touchDragSensitivity = 0.03;
     this.touchBoundsX = 16;
     this.touchBoundsYPos = 3;
     this.touchBoundsYNeg = 7;

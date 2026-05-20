@@ -15,7 +15,7 @@ export class Controls {
     this.speed = 0.01;
     this.lerpFactor = 0.05;
     this.initialTouchX = null;
-    this.touchMultipler = 2;
+    this.touchMultipler = 20;
     this.mouseOffsetStrength = 0.5;
     this.targetOffset = new THREE.Vector3();
     this.targetRotation = new THREE.Euler(0, 0, 0);

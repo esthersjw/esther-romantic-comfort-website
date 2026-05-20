@@ -245,3 +245,13 @@ body {
   border-radius: 0;
   transition: width 0.3s ease;
 }
+
+@media (max-width: 768px) {
+  .top-right-controls {
+    right: 18px;
+  }
+
+  .info-btn {
+    font-size: 20px;
+  }
+}
