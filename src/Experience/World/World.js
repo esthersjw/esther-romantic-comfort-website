@@ -4,6 +4,7 @@ import { Environment } from "./Environment";
 import { Room } from "./Room";
 import { Butterfly } from "./Butterfly";
 import { Fireflies } from "./Fireflies";
+import { Candle } from "./Candle";
 import { Raycaster } from "./Raycaster";
 
 export class World {
@@ -58,10 +59,8 @@ export class World {
         ),
       ];
       this.fireflies = new Fireflies();
+      this.candle = new Candle();
       this.raycaster = new Raycaster();
-      // this.balloons = new Balloons();
-      // this.waterPlane = new WaterPlane();
-      // this.experience.outline.apply(this.experience.scene);
     });
 
     this.init();
@@ -75,6 +74,7 @@ export class World {
     this.environment?.update();
     this.butterflies?.forEach((b) => b.update());
     this.fireflies?.update();
+    this.candle?.update();
     this.raycaster?.update();
     this.balloons?.update();
     this.test?.update();

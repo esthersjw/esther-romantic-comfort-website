@@ -18,15 +18,15 @@ const MESSAGES_ROT = { x: -Math.PI / 2, y: 0, z: -0.2426 };
 const CHARACTER_DATA = {
   Fourth_Carl_Raycaster: {
     title: "Carl Fredricksen",
-    text: "A retired balloon salesman with a gruff exterior and a heart full of love. After losing his beloved wife Ellie, Carl ties thousands of balloons to their house and sets off for Paradise Falls — the adventure they always dreamed of together.",
+    text: "Ellie was a very loving, securely attached person in the movie (from what we can tell). She acted as a secure base for Carl. While Carl was in the relationship he was secure, but showed signs of anxious attachment. When Carl lost Ellie, that anxious attachment swung deeply to an avoidant style attachment to protect himself from future pain. By the end of the movie though, Carl releases the house, suggesting letting go of the past and starts becoming warm again, showing an earned secure attachment style.",
   },
   Fourth_Russell_Raycaster: {
     title: "Russell",
-    text: "An earnest 8-year-old Wilderness Explorer who accidentally stows away on Carl's journey. Cheerful, persistent, and surprisingly wise, Russell teaches Carl that the best adventure is the one shared with someone who needs you.",
+    text: "Russell is anxiously attached, he constantly keeps showing up even when shooed off. He immediately tries to show his usefulness and constantly tries to read Carl's mood and emotional state in order to help with it even when not asked. His father was largely absent and inconsistent, leading to Russell having this attachment style.",
   },
   Fourth_Dug_Raycaster: {
     title: "Dug",
-    text: "A golden retriever fitted with a special collar that translates his thoughts into speech. Boundlessly loyal and easily distracted by squirrels, Dug just wants to be a good boy — and to find someone to call his master.",
+    text: 'Dug is pretty interesting, he seems to have an anxious-preoccupied attachment style by the fact that he forms bonds really quickly given his quote, "My name is Dug. I have just met you, and I love you!" Over the film though, he appears to end with an earned-secure attachment.',
   },
 };
 
@@ -301,7 +301,7 @@ export class Raycaster {
     }
 
     this._onCharacterClick = (e) => {
-      if (this.modal.isOpen) return;
+      if (Modal.anyOpen) return;
       const mouse = new THREE.Vector2(
         (e.clientX / window.innerWidth) * 2 - 1,
         -(e.clientY / window.innerHeight) * 2 + 1,
@@ -387,7 +387,6 @@ export class Raycaster {
         opacity: 0.6;
       }
       #house-drag-hint .hint-icon {
-        font-size: 22px;
         display: block;
         animation: hintSlide 1.6s ease-in-out infinite;
       }
@@ -402,7 +401,7 @@ export class Raycaster {
     this._dragHint.id = "house-drag-hint";
     this._dragHint.innerHTML = `
       <span class="hint-arrow">←</span>
-      <span class="hint-icon">✋</span>
+      <span class="hint-icon"><svg width="22" height="26" viewBox="0 0 550 650" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="display:block"><path d="M349.738 0C239.875 0 149.738 90.1367 149.738 200V265.625C106.672 240.43 50.7148 248.926 20.0507 289.844C-12.9571 333.789 -4.3633 396.777 39.582 429.688V430.469H40.3632L174.738 528.906V650H524.738V517.969C525.227 516.992 525.715 516.113 526.301 514.844C529.133 509.18 532.16 501.172 535.676 490.625C542.707 469.629 549.738 439.258 549.738 400V200C549.738 90.1367 459.602 0 349.738 0ZM349.738 50C432.355 50 499.738 117.383 499.738 200V400C499.738 433.594 494.27 458.594 488.801 475C486.066 483.203 482.844 489.16 480.988 492.969C480.012 494.824 479.914 496.094 479.426 496.875C479.23 497.266 478.742 497.559 478.645 497.656L482.551 500H220.832L214.582 495.312L70.0507 389.844C47.6875 373.145 43.1953 342.578 59.8945 320.312C76.6914 297.949 107.16 293.457 129.426 310.156H130.207L160.676 331.25L199.738 358.594V200C199.738 117.383 267.121 50 349.738 50ZM224.738 550H474.738V600H224.738V550Z"/></svg></span>
       <span class="hint-arrow">→</span>
     `;
     document.body.appendChild(this._dragHint);
@@ -846,7 +845,7 @@ export class Raycaster {
 
     if (this.inFocus) {
       if (this._inCharactersMode) {
-        if (!this.modal.isOpen) {
+        if (!Modal.anyOpen) {
           this.raycaster.setFromCamera(this.mouse.instance, this.camera);
           const hits = this.raycaster.intersectObjects(this._characterMeshes);
           document.body.style.cursor = hits.length ? "pointer" : "default";
@@ -893,14 +892,24 @@ export class Raycaster {
           hoveredTexts = textsHit.length > 0;
         }
 
-        document.body.style.cursor =
-          hovered || hoveredTexts
+        document.body.style.cursor = Modal.anyOpen
+          ? "default"
+          : hovered || hoveredTexts
             ? "pointer"
             : this._isDragging
               ? "grabbing"
               : "grab";
       } else {
         document.body.style.cursor = "default";
+      }
+      return;
+    }
+
+    if (Modal.anyOpen) {
+      document.body.style.cursor = "default";
+      if (this._currentHoveredName !== null) {
+        this._currentHoveredName = null;
+        this._hideHoverLabel();
       }
       return;
     }
@@ -915,7 +924,7 @@ export class Raycaster {
       this._currentHoveredName = hoverName;
       const labels = {
         Photos_Raycaster_Hitbox: "Photos",
-        Calendar_Raycaster_Hitbox: "Needs Calendar",
+        Calendar_Raycaster_Hitbox: "Needs & Intimacy Calendar",
         Characters_Raycaster_Hitbox: "Character Attachment Styles",
         House_Raycaster_Hitbox: "Learning Attachment Styles",
       };

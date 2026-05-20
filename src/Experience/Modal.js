@@ -1,6 +1,9 @@
 import gsap from "gsap";
 
 export class Modal {
+  static _openCount = 0;
+  static get anyOpen() { return Modal._openCount > 0; }
+
   constructor() {
     this._overlay = document.createElement("div");
     this._overlay.className = "modal-overlay";
@@ -27,10 +30,21 @@ export class Modal {
   open(title, text) {
     this._el.querySelector(".modal__title").textContent = title;
     this._el.querySelector(".modal__paragraph").textContent = text;
+    this._show();
+  }
+
+  openHTML(title, html) {
+    this._el.querySelector(".modal__title").textContent = title;
+    this._el.querySelector(".modal__paragraph").innerHTML = html;
+    this._show();
+  }
+
+  _show() {
 
     gsap.killTweensOf([this._overlay, this._el]);
     this._overlay.style.pointerEvents = "auto";
     this._el.style.pointerEvents = "auto";
+    Modal._openCount++;
 
     gsap.fromTo(this._overlay,
       { opacity: 0 },
@@ -48,7 +62,10 @@ export class Modal {
       opacity: 0,
       duration: 0.25,
       ease: "power2.in",
-      onComplete: () => { this._overlay.style.pointerEvents = "none"; },
+      onComplete: () => {
+        this._overlay.style.pointerEvents = "none";
+        Modal._openCount = Math.max(0, Modal._openCount - 1);
+      },
     });
     gsap.to(this._el, {
       opacity: 0,
