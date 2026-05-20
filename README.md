@@ -29,7 +29,7 @@ This repo contains code of John and Patricia's comfort website for couples thera
 
 # Extra info
 
-- Click on the radio!! FOR DA MARRIED LIFE!!!
+- Click on the radio/phonograph thingy mbobber!! FOR DA MARRIED LIFE!!!
 - Blender file is super redacted cause the file size is HUGE. But you can see the setup.
 
 # Areas of improvement / things to do
