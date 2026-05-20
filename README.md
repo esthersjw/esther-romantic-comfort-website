@@ -1,0 +1,26 @@
+# 💑 John and Patricia's Couple's Therapy Website 🏡
+
+**[Live site](https://john-and-patricias-comfort-site-about-attachment-styles.com/)** | **[Tutorial](https://youtu.be/w2MnkhTGJQA)**
+
+This repo contains code of John and Patricia's comfort website for couples therapy about attachment style!! It's a prototype website. John and Patricia are not real people. It's a website created with [Blender](https://www.blender.org/), [Three.js](https://threejs.org/).
+
+![Page screenshot](public/media/og-image.webp?raw=true "Page Screenshot")
+
+# Credits!!! 💖
+
+- [Paper Up house from Paper Replika](https://paper-replika.com/index.php/disney/carls-flying-house-up-movie-papercraft)
+- [Music - Married Life](https://www.youtube.com/watch?v=2rn-vMbFglI)
+- [Door key model by artemtem](https://sketchfab.com/3d-models/door-keys-30afb0dd7d714f6bbbcd4acc891214da)
+- [Butterfly wing from Adobe Stock](https://stock.adobe.com/search?k=butterfly+wings&asset_id=261021293)
+- [Furniture models from Interior Models referral link](https://superhivemarket.com/products/interior-models?ref=603)
+- [Texts from HealthyGamerGG](https://www.youtube.com/post/UgkxN57HIs-unoQuYG7o9NNm2a0RH0EJWpzg)
+
+# Extra info
+
+- Click on the radio!! FOR DA MARRIED LIFE!!!
+
+# Areas of improvement / things to do
+
+- Better animations
+- More interactions
+- Performance monitoring and disabling stuff
