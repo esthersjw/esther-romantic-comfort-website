@@ -14,6 +14,9 @@ This repo contains code of John and Patricia's comfort website for couples thera
 - [Butterfly wing from Adobe Stock](https://stock.adobe.com/search?k=butterfly+wings&asset_id=261021293)
 - [Furniture models from Interior Models referral link](https://superhivemarket.com/products/interior-models?ref=603)
 - [Texts from HealthyGamerGG](https://www.youtube.com/post/UgkxN57HIs-unoQuYG7o9NNm2a0RH0EJWpzg)
+- [Gottmann's Book](https://www.amazon.com/Seven-Principles-Making-Marriage-Work/dp/0553447718/ref=tmm_pap_swatch_0)
+- [Ruler image texture](https://www.schoolspecialty.com/school-smart-metal-edge-wood-ruler-12-inches-015348?srsltid=AfmBOorbvGorNnIZ0Jvux_IRCLMXdIiZYJUN3sUBvv84kSbVdUAO_yt2)
+- [Cutting pad image texture](https://www.quiltersreview.com/self-healing-cutting-mat/)
 
 # Extra info
 
