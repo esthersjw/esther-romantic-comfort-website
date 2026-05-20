@@ -25,6 +25,7 @@ This repo contains code of John and Patricia's comfort website for couples thera
 - [Heart and Mitten SVG from SVGRepo](https://www.svgrepo.com/vectors/heart/2)
 - [Robin Model](https://sketchfab.com/3d-models/high-per-realistic-europen-robin-49bf02ce59e04bfa858b56502b8a05a1)
 - [Fireflies](https://threejs-journey.com/lessons/adding-details-to-the-scene)
+- [Gobos](https://mschumacher.gumroad.com/l/DkHCV)
 
 # Extra info
 
