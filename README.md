@@ -17,6 +17,7 @@ This repo contains code of John and Patricia's comfort website for couples thera
 - [Gottmann's Book](https://www.amazon.com/Seven-Principles-Making-Marriage-Work/dp/0553447718/ref=tmm_pap_swatch_0)
 - [Ruler image texture](https://www.schoolspecialty.com/school-smart-metal-edge-wood-ruler-12-inches-015348?srsltid=AfmBOorbvGorNnIZ0Jvux_IRCLMXdIiZYJUN3sUBvv84kSbVdUAO_yt2)
 - [Cutting pad image texture](https://www.quiltersreview.com/self-healing-cutting-mat/)
+- [Hiking calendar image](https://www.outsideonline.com/adventure-travel/destinations/10-most-beautiful-hikes-world/)
 
 # Extra info
 
