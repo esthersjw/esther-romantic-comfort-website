@@ -22,6 +22,7 @@ This repo contains code of John and Patricia's comfort website for couples thera
 - [Flowmery Font](https://www.1001fonts.com/flowmery-font.html)
 - [Ivy and leaves from Botaniq](https://polygoniq.com/3d/botaniq/)
 - [Cardboard texture from SouthernShotty](https://superhivemarket.com/products/crafty-asset-pack)
+- [Heart and Mitten SVG from SVGRepo](https://www.svgrepo.com/vectors/heart/2)
 
 # Extra info
 
