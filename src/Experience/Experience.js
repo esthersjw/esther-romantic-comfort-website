@@ -44,7 +44,10 @@ export class Experience {
     await this.renderer.init();
 
     this.resources = new Resources();
-    // this.preloader = new Preloader();
+    this.preloader = new Preloader();
+    this.preloader.on("preloaderfinished", () => {
+      this.raycaster.enabled = true;
+    });
     this.outline = new Outline();
 
     this.world = new World();

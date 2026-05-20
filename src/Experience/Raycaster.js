@@ -19,6 +19,7 @@ export class Raycaster {
     this.meshes = [];
 
     this.isModalOpen = false;
+    this.enabled = false;
 
     this.init();
   }
@@ -61,6 +62,7 @@ export class Raycaster {
 
   init() {
     const handleClickandTouch = () => {
+      if (!this.enabled) return;
       if (this.isModalOpen) return;
 
       const intersects = this.raycaster.intersectObjects(this.meshes);
@@ -106,6 +108,7 @@ export class Raycaster {
   }
 
   update() {
+    if (!this.enabled) return;
     if (this.isModalOpen) {
       if (this.hoveredObject) {
         document.body.style.cursor = "default";

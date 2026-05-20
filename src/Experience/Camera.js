@@ -21,8 +21,9 @@ export class Camera {
     this.zoomTarget = 0;
     this.zoomOffset = 0;
     this.zoomSpeed = 0.02;
-    this.zoomMin = -8;
-    this.zoomMax = 4;
+    const zoomBounds = this.getZoomBounds();
+    this.zoomMin = zoomBounds.min;
+    this.zoomMax = zoomBounds.max;
     this._zoomDir = new THREE.Vector3();
     this._pinchDist0 = null;
     this._pinchZoom0 = 0;
@@ -158,9 +159,18 @@ export class Camera {
     };
   }
 
+  getZoomBounds() {
+    const isSmall =
+      this.experience.device.isMobileDevice || window.innerWidth < 768;
+    return isSmall ? { min: -12, max: 12 } : { min: -8, max: 4 };
+  }
+
   resize() {
     this.instance.aspect = this.experience.sizes.aspect;
     this.instance.updateProjectionMatrix();
+    const zoomBounds = this.getZoomBounds();
+    this.zoomMin = zoomBounds.min;
+    this.zoomMax = zoomBounds.max;
   }
 
   update() {

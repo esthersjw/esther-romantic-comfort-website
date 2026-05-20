@@ -13,6 +13,7 @@ export class Preloader extends EventEmitter {
 
     this.preloader = document.querySelector(".preloader");
     this.progressBar = document.querySelector(".preloader__progress-bar");
+    this.percentText = document.querySelector(".preloader__percent");
 
     this.resources.on("progress", (value) => {
       this.onLoad(value);
@@ -24,7 +25,9 @@ export class Preloader extends EventEmitter {
   }
 
   onLoad(value) {
-    this.progressBar.style.width = `${Math.round(value * 100)}%`;
+    const pct = Math.round(value * 100);
+    this.progressBar.style.width = `${pct}%`;
+    this.percentText.textContent = `${pct}%`;
   }
 
   playOutro() {
@@ -34,7 +37,7 @@ export class Preloader extends EventEmitter {
       delay: 1,
       onComplete: () => {
         this.preloader.remove();
-        // this.emit("preloaderfinished");
+        this.emit("preloaderfinished");
       },
     });
   }

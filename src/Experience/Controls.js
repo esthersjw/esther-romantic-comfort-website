@@ -20,7 +20,7 @@ export class Controls {
     this.targetOffset = new THREE.Vector3();
     this.targetRotation = new THREE.Euler(0, 0, 0);
 
-    this.bounds = { max: 12.268600582852038, min: -17.731339744466 };
+    this.bounds = { max: this.getMaxBound(), min: -17.731339744466 };
     this.range = this.bounds.max - this.bounds.min;
     this.progress = (this.cameraRig.position.z - this.bounds.min) / this.range;
 
@@ -61,7 +61,16 @@ export class Controls {
     });
   }
 
-  resize() {}
+  getMaxBound() {
+    const isSmall =
+      this.experience.device.isMobileDevice || window.innerWidth < 768;
+    return isSmall ? 22 : 12.268600582852038;
+  }
+
+  resize() {
+    this.bounds.max = this.getMaxBound();
+    this.range = this.bounds.max - this.bounds.min;
+  }
 
   update() {
     this.progress = (this.cameraRig.position.z - this.bounds.min) / this.range;

@@ -229,13 +229,21 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  width: 100%;
 }
 
 .preloader__progress-wrapper {
-  width: 450px;
-  height: 6px;
+  width: 100%;
+  height: 2px;
   background: #ddd0bc;
   border-radius: 0;
+}
+
+.preloader__percent {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: rgba(92, 61, 46, 0.55);
+  margin-top: 10px;
 }
 
 .preloader__progress-bar {
