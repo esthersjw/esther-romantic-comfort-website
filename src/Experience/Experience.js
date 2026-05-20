@@ -30,7 +30,9 @@ export class Experience {
     this.canvasElement = document.getElementById("experience-canvas");
 
     this.scene = new THREE.Scene();
+    this.debug = window.location.hash === "#debug";
     this.gui = new GUI({ title: "Controls" });
+    if (!this.debug) this.gui.hide();
     this.time = new Time();
     this.device = new Device();
     this.sizes = new Sizes();

@@ -2,15 +2,33 @@ import * as THREE from "three/webgpu";
 import { Experience } from "../Experience";
 import gsap from "gsap";
 import { Howl } from "howler";
+import { Modal } from "../Modal";
 
 const PHOTOS_POS = { x: -10.818357, y: 8.656318, z: -10.226414 };
 const CALENDAR_POS = { x: 15.57131, y: 4.268601, z: -21.012699 };
+const CHARACTERS_POS = { x: -6.885733, y: -7.250762, z: -16.617651 };
+const CHARACTERS_ROT = { x: 1.328431 - Math.PI / 2, y: 0, z: 0 };
 const HOUSE_POS = { x: -1.271494, y: 3.436944, z: -13.345522 };
 const HOUSE_ROT = { x: -0.264897, y: 0, z: 0 };
 const HOUSE_DRAG_LIMIT = 7;
 const HOUSE_DRAG_SENSITIVITY = 0.02;
 const MESSAGES_POS = { x: 7.869, y: 8.3452, z: -23.766 };
 const MESSAGES_ROT = { x: -Math.PI / 2, y: 0, z: -0.2426 };
+
+const CHARACTER_DATA = {
+  Fourth_Carl_Raycaster: {
+    title: "Carl Fredricksen",
+    text: "A retired balloon salesman with a gruff exterior and a heart full of love. After losing his beloved wife Ellie, Carl ties thousands of balloons to their house and sets off for Paradise Falls — the adventure they always dreamed of together.",
+  },
+  Fourth_Russell_Raycaster: {
+    title: "Russell",
+    text: "An earnest 8-year-old Wilderness Explorer who accidentally stows away on Carl's journey. Cheerful, persistent, and surprisingly wise, Russell teaches Carl that the best adventure is the one shared with someone who needs you.",
+  },
+  Fourth_Dug_Raycaster: {
+    title: "Dug",
+    text: "A golden retriever fitted with a special collar that translates his thoughts into speech. Boundlessly loyal and easily distracted by squirrels, Dug just wants to be a good boy — and to find someone to call his master.",
+  },
+};
 
 let dragHintDismissed = false;
 
@@ -32,6 +50,9 @@ export class Raycaster {
     this._isDragging = false;
     this._inHouseMode = false;
     this._inMessagesMode = false;
+    this._inCharactersMode = false;
+    this._characterMeshes = [];
+    this._mouseRaw = { x: 0, y: 0 };
     this._dragStartX = 0;
     this._dragStartY = 0;
     this._dragStartOffset = 0;
@@ -47,8 +68,10 @@ export class Raycaster {
     this.backBtn = document.getElementById("back-btn");
     this._createDragHint();
     this._createHoverLabel();
+    this._createCursorTooltip();
     this._createMessagesBackBtn();
     this._currentHoveredName = null;
+    this.modal = new Modal();
 
     this.music = new Howl({
       src: ["/audio/music/Married_Life.mp3"],
@@ -73,13 +96,48 @@ export class Raycaster {
   }
 
   init() {
+    let lastTouchEnd = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchWasDrag = false;
+    const DRAG_THRESHOLD = 8;
+
+    this.canvas.addEventListener(
+      "touchstart",
+      (e) => {
+        if (e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          touchWasDrag = false;
+        } else {
+          touchWasDrag = true;
+        }
+      },
+      { passive: true },
+    );
+
+    this.canvas.addEventListener(
+      "touchmove",
+      (e) => {
+        if (touchWasDrag || e.touches.length !== 1) return;
+        const dx = e.touches[0].clientX - touchStartX;
+        const dy = e.touches[0].clientY - touchStartY;
+        if (Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD) touchWasDrag = true;
+      },
+      { passive: true },
+    );
+
     const handleInteraction = (e) => {
       if (this.inFocus) return;
 
       if (e.type === "touchend") {
+        lastTouchEnd = Date.now();
+        if (touchWasDrag) return;
         const touch = e.changedTouches[0];
         this.mouse.instance.x = (touch.clientX / window.innerWidth) * 2 - 1;
         this.mouse.instance.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+      } else if (e.type === "click" && Date.now() - lastTouchEnd < 500) {
+        return;
       }
 
       this.raycaster.setFromCamera(this.mouse.instance, this.camera);
@@ -94,6 +152,7 @@ export class Raycaster {
 
       if (name === "Photos_Raycaster_Hitbox") this.goToPhotos();
       if (name === "Calendar_Raycaster_Hitbox") this.goToCalendar();
+      if (name === "Characters_Raycaster_Hitbox") this.goToCharacters();
       if (name === "House_Raycaster_Hitbox") this.goToHouse();
       if (name === "Music_Raycaster_Hitbox") this.toggleMusic();
     };
@@ -179,11 +238,107 @@ export class Raycaster {
     });
   }
 
+  goToCharacters() {
+    this.inFocus = true;
+    this.cameraObj.locked = true;
+
+    const dest = this.cameraObj.zoomedDestination(
+      CHARACTERS_POS,
+      CHARACTERS_ROT.x,
+      CHARACTERS_ROT.y,
+      CHARACTERS_ROT.z,
+    );
+    gsap.to(this.cameraObj.instance.position, {
+      x: dest.x,
+      y: dest.y,
+      z: dest.z,
+      duration: 2,
+      ease: "power2.inOut",
+    });
+    gsap.to(this.cameraObj.instance.rotation, {
+      x: CHARACTERS_ROT.x,
+      y: CHARACTERS_ROT.y,
+      z: CHARACTERS_ROT.z,
+      duration: 2,
+      ease: "power2.inOut",
+      onComplete: () => {
+        this.cameraObj.basePosition.set(
+          CHARACTERS_POS.x,
+          CHARACTERS_POS.y,
+          CHARACTERS_POS.z,
+        );
+        this.cameraObj.baseRotation.set(
+          CHARACTERS_ROT.x,
+          CHARACTERS_ROT.y,
+          CHARACTERS_ROT.z,
+        );
+        this.cameraObj.mousePositionStrength = 0;
+        this.cameraObj.mouseRotationStrength = 0;
+        this.cameraObj.locked = false;
+        this.backBtn.classList.add("back-btn--visible");
+        gsap.to(this.cameraObj, {
+          mousePositionStrength: 0.5,
+          mouseRotationStrength: 0.01,
+          duration: 0.6,
+          ease: "power2.out",
+        });
+        this.enableCharacterInteraction();
+      },
+    });
+  }
+
+  enableCharacterInteraction() {
+    this._inCharactersMode = true;
+    this._characterMeshes = [];
+
+    const roomScene = this.experience.world.room?.model;
+    if (roomScene) {
+      roomScene.traverse((child) => {
+        if (child.isMesh && CHARACTER_DATA[child.name]) {
+          this._characterMeshes.push(child);
+        }
+      });
+    }
+
+    this._onCharacterClick = (e) => {
+      if (this.modal.isOpen) return;
+      const mouse = new THREE.Vector2(
+        (e.clientX / window.innerWidth) * 2 - 1,
+        -(e.clientY / window.innerHeight) * 2 + 1,
+      );
+      this.raycaster.setFromCamera(mouse, this.camera);
+      const hits = this.raycaster.intersectObjects(this._characterMeshes);
+      if (!hits.length) return;
+      const data = CHARACTER_DATA[hits[0].object.name];
+      if (data) this.modal.open(data.title, data.text);
+    };
+
+    this.canvas.addEventListener("click", this._onCharacterClick);
+  }
+
+  disableCharacterInteraction() {
+    this._inCharactersMode = false;
+    this._characterMeshes = [];
+    this._currentHoveredName = null;
+    this._tooltipDrifting = false;
+    this._hideCursorTooltip();
+    if (this._onCharacterClick) {
+      this.canvas.removeEventListener("click", this._onCharacterClick);
+      this._onCharacterClick = null;
+    }
+    this.modal.close();
+  }
+
   goToHouse() {
     this.inFocus = true;
     this.cameraObj.locked = true;
 
-    const dest = this.cameraObj.zoomedDestination(HOUSE_POS, HOUSE_ROT.x, HOUSE_ROT.y, HOUSE_ROT.z);
+    const dest = this.cameraObj.zoomedDestination(
+      HOUSE_POS,
+      HOUSE_ROT.x,
+      HOUSE_ROT.y,
+      HOUSE_ROT.z,
+    );
     gsap.to(this.cameraObj.instance.position, {
       x: dest.x,
       y: dest.y,
@@ -277,6 +432,86 @@ export class Raycaster {
     this._hoverLabel.id = "hover-label";
     document.body.appendChild(this._hoverLabel);
     gsap.set(this._hoverLabel, { xPercent: -50, y: 12, opacity: 0 });
+  }
+
+  _createCursorTooltip() {
+    this._cursorTooltip = document.createElement("div");
+    this._cursorTooltip.className = "cursor-tooltip";
+    document.body.appendChild(this._cursorTooltip);
+    gsap.set(this._cursorTooltip, { opacity: 0 });
+
+    this._tooltipVel = { x: 0, y: 0 };
+    this._tooltipDrifting = false;
+
+    window.addEventListener("mousemove", (e) => {
+      const dx = e.clientX - this._mouseRaw.x;
+      const dy = e.clientY - this._mouseRaw.y;
+      // Smooth velocity with an EMA so the drift feels natural
+      this._tooltipVel.x = 0.35 * dx + 0.65 * this._tooltipVel.x;
+      this._tooltipVel.y = 0.35 * dy + 0.65 * this._tooltipVel.y;
+      this._mouseRaw.x = e.clientX;
+      this._mouseRaw.y = e.clientY;
+
+      if (!this._inCharactersMode || this.modal?.isOpen) return;
+
+      if (this._tooltipDrifting) {
+        // Cursor re-entered while drifting — cancel drift, restore if still hovering
+        this._tooltipDrifting = false;
+        gsap.killTweensOf(this._cursorTooltip);
+        if (this._currentHoveredName) {
+          gsap.to(this._cursorTooltip, {
+            opacity: 1,
+            duration: 0.15,
+            ease: "power2.out",
+          });
+        }
+      }
+
+      // Always track cursor position — even while fading out after leaving a mesh
+      this._cursorTooltip.style.left = e.clientX + 18 + "px";
+      this._cursorTooltip.style.top = e.clientY + 18 + "px";
+    });
+
+    document.addEventListener("mouseleave", () => {
+      if (!this._inCharactersMode || !this._currentHoveredName) return;
+      this._tooltipDrifting = true;
+      const fromLeft = parseFloat(this._cursorTooltip.style.left) || 0;
+      const fromTop = parseFloat(this._cursorTooltip.style.top) || 0;
+      gsap.killTweensOf(this._cursorTooltip);
+      gsap.to(this._cursorTooltip, {
+        left: fromLeft + this._tooltipVel.x * 40,
+        top: fromTop + this._tooltipVel.y * 40,
+        opacity: 0,
+        duration: 0.45,
+        ease: "power2.out",
+        onComplete: () => {
+          this._tooltipDrifting = false;
+        },
+      });
+    });
+  }
+
+  _showCursorTooltip(text) {
+    this._tooltipDrifting = false;
+    this._cursorTooltip.textContent = text;
+    this._cursorTooltip.style.left = this._mouseRaw.x + 18 + "px";
+    this._cursorTooltip.style.top = this._mouseRaw.y + 18 + "px";
+    gsap.killTweensOf(this._cursorTooltip);
+    gsap.to(this._cursorTooltip, {
+      opacity: 1,
+      duration: 0.2,
+      ease: "power2.out",
+    });
+  }
+
+  _hideCursorTooltip() {
+    this._tooltipDrifting = false;
+    gsap.killTweensOf(this._cursorTooltip);
+    gsap.to(this._cursorTooltip, {
+      opacity: 0,
+      duration: 0.15,
+      ease: "power2.in",
+    });
   }
 
   _createMessagesBackBtn() {
@@ -406,7 +641,9 @@ export class Raycaster {
     const isFlipped = this._attachmentFlipState[mesh.name];
     this._attachmentFlipState[mesh.name] = !isFlipped;
     const targetValue = isFlipped
-      ? (this._hoveredAttachmentMesh === mesh ? 0.1 : 0)
+      ? this._hoveredAttachmentMesh === mesh
+        ? 0.1
+        : 0
       : 1.0;
     this._animateFlip(mesh, targetValue);
   }
@@ -450,7 +687,12 @@ export class Raycaster {
     this._inMessagesMode = true;
     this.cameraObj.locked = true;
 
-    const dest = this.cameraObj.zoomedDestination(MESSAGES_POS, MESSAGES_ROT.x, MESSAGES_ROT.y, MESSAGES_ROT.z);
+    const dest = this.cameraObj.zoomedDestination(
+      MESSAGES_POS,
+      MESSAGES_ROT.x,
+      MESSAGES_ROT.y,
+      MESSAGES_ROT.z,
+    );
     gsap.to(this.cameraObj.instance.position, {
       x: dest.x,
       y: dest.y,
@@ -465,8 +707,16 @@ export class Raycaster {
       duration: 2,
       ease: "power2.inOut",
       onComplete: () => {
-        this.cameraObj.basePosition.set(MESSAGES_POS.x, MESSAGES_POS.y, MESSAGES_POS.z);
-        this.cameraObj.baseRotation.set(MESSAGES_ROT.x, MESSAGES_ROT.y, MESSAGES_ROT.z);
+        this.cameraObj.basePosition.set(
+          MESSAGES_POS.x,
+          MESSAGES_POS.y,
+          MESSAGES_POS.z,
+        );
+        this.cameraObj.baseRotation.set(
+          MESSAGES_ROT.x,
+          MESSAGES_ROT.y,
+          MESSAGES_ROT.z,
+        );
         this.cameraObj.mousePositionStrength = 0;
         this.cameraObj.mouseRotationStrength = 0;
         this.cameraObj.locked = false;
@@ -484,7 +734,12 @@ export class Raycaster {
     const restoreX = this._savedHouseDragX ?? HOUSE_POS.x;
     this._houseDragTargetX = restoreX;
     const restorePos = { x: restoreX, y: HOUSE_POS.y, z: HOUSE_POS.z };
-    const dest = this.cameraObj.zoomedDestination(restorePos, HOUSE_ROT.x, HOUSE_ROT.y, HOUSE_ROT.z);
+    const dest = this.cameraObj.zoomedDestination(
+      restorePos,
+      HOUSE_ROT.x,
+      HOUSE_ROT.y,
+      HOUSE_ROT.z,
+    );
 
     gsap.to(this.cameraObj.instance.position, {
       x: dest.x,
@@ -516,6 +771,7 @@ export class Raycaster {
       this._inMessagesMode = false;
       this._messagesBackBtn.classList.remove("back-btn--visible");
     }
+    if (this._inCharactersMode) this.disableCharacterInteraction();
     this.disableHouseDrag();
     this.cameraObj.locked = true;
     this.backBtn.classList.remove("back-btn--visible");
@@ -589,13 +845,40 @@ export class Raycaster {
     }
 
     if (this.inFocus) {
+      if (this._inCharactersMode) {
+        if (!this.modal.isOpen) {
+          this.raycaster.setFromCamera(this.mouse.instance, this.camera);
+          const hits = this.raycaster.intersectObjects(this._characterMeshes);
+          document.body.style.cursor = hits.length ? "pointer" : "default";
+          const hoverName = hits.length ? hits[0].object.name : null;
+          if (hoverName !== this._currentHoveredName) {
+            this._currentHoveredName = hoverName;
+            const data = hoverName ? CHARACTER_DATA[hoverName] : null;
+            if (data) this._showCursorTooltip(data.title);
+            else this._hideCursorTooltip();
+          }
+        } else {
+          if (this._currentHoveredName !== null) {
+            this._currentHoveredName = null;
+            this._hideCursorTooltip();
+          }
+          document.body.style.cursor = "default";
+        }
+        return;
+      }
+
       if (this._inHouseMode) {
         this.raycaster.setFromCamera(this.mouse.instance, this.camera);
-        const attachHits = this.raycaster.intersectObjects(this._attachmentMeshes);
+        const attachHits = this.raycaster.intersectObjects(
+          this._attachmentMeshes,
+        );
         const hovered = attachHits.length ? attachHits[0].object : null;
 
         if (hovered !== this._hoveredAttachmentMesh) {
-          if (this._hoveredAttachmentMesh && !this._attachmentFlipState[this._hoveredAttachmentMesh.name]) {
+          if (
+            this._hoveredAttachmentMesh &&
+            !this._attachmentFlipState[this._hoveredAttachmentMesh.name]
+          ) {
             this._animateFlip(this._hoveredAttachmentMesh, 0);
           }
           if (hovered && !this._attachmentFlipState[hovered.name]) {
@@ -610,9 +893,12 @@ export class Raycaster {
           hoveredTexts = textsHit.length > 0;
         }
 
-        document.body.style.cursor = (hovered || hoveredTexts)
-          ? "pointer"
-          : this._isDragging ? "grabbing" : "grab";
+        document.body.style.cursor =
+          hovered || hoveredTexts
+            ? "pointer"
+            : this._isDragging
+              ? "grabbing"
+              : "grab";
       } else {
         document.body.style.cursor = "default";
       }
@@ -630,6 +916,7 @@ export class Raycaster {
       const labels = {
         Photos_Raycaster_Hitbox: "Photos",
         Calendar_Raycaster_Hitbox: "Needs Calendar",
+        Characters_Raycaster_Hitbox: "Character Attachment Styles",
         House_Raycaster_Hitbox: "Learning Attachment Styles",
       };
       const text = hoverName ? labels[hoverName] : null;

@@ -26,6 +26,12 @@ export class Camera {
     this._zoomDir = new THREE.Vector3();
     this._pinchDist0 = null;
     this._pinchZoom0 = 0;
+    this._touchPrevX = null;
+    this._touchPrevY = null;
+    this.touchDragSensitivity = 0.01;
+    this.touchBoundsX = 16;
+    this.touchBoundsYPos = 3;
+    this.touchBoundsYNeg = 7;
 
     this.init();
     this.setOrbitControls();
@@ -74,22 +80,56 @@ export class Camera {
       if (e.touches.length === 2) {
         this._pinchDist0 = this._getPinchDist(e.touches);
         this._pinchZoom0 = this.zoomTarget;
+        this._touchPrevX = null;
+        this._touchPrevY = null;
+      } else if (e.touches.length === 1) {
+        this._touchPrevX = e.touches[0].clientX;
+        this._touchPrevY = e.touches[0].clientY;
       }
     }, { passive: true });
 
     canvas.addEventListener("touchmove", (e) => {
-      if (e.touches.length !== 2 || this._pinchDist0 == null) return;
-      e.preventDefault();
-      const delta = (this._getPinchDist(e.touches) - this._pinchDist0) * 0.05;
-      this.zoomTarget = Math.max(
-        this.zoomMin,
-        Math.min(this.zoomMax, this._pinchZoom0 + delta),
-      );
+      if (e.touches.length === 2 && this._pinchDist0 != null) {
+        e.preventDefault();
+        const delta = (this._getPinchDist(e.touches) - this._pinchDist0) * 0.05;
+        this.zoomTarget = Math.max(
+          this.zoomMin,
+          Math.min(this.zoomMax, this._pinchZoom0 + delta),
+        );
+      } else if (
+        e.touches.length === 1 &&
+        this._touchPrevX !== null &&
+        !this.locked &&
+        !this.experience.world?.raycaster?.inFocus &&
+        !this.experience.raycaster?.isModalOpen
+      ) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - this._touchPrevX;
+        const dy = e.touches[0].clientY - this._touchPrevY;
+
+        this.basePosition.x = THREE.MathUtils.clamp(
+          this.basePosition.x - dx * this.touchDragSensitivity,
+          this.homePosition.x - this.touchBoundsX,
+          this.homePosition.x + this.touchBoundsX,
+        );
+        this.basePosition.y = THREE.MathUtils.clamp(
+          this.basePosition.y + dy * this.touchDragSensitivity,
+          this.homePosition.y - this.touchBoundsYNeg,
+          this.homePosition.y + this.touchBoundsYPos,
+        );
+
+        this._touchPrevX = e.touches[0].clientX;
+        this._touchPrevY = e.touches[0].clientY;
+      }
     }, { passive: false });
 
-    const endPinch = () => { this._pinchDist0 = null; };
-    canvas.addEventListener("touchend", endPinch, { passive: true });
-    canvas.addEventListener("touchcancel", endPinch, { passive: true });
+    const endTouch = () => {
+      this._pinchDist0 = null;
+      this._touchPrevX = null;
+      this._touchPrevY = null;
+    };
+    canvas.addEventListener("touchend", endTouch, { passive: true });
+    canvas.addEventListener("touchcancel", endTouch, { passive: true });
   }
 
   _getPinchDist(touches) {
@@ -132,6 +172,18 @@ export class Camera {
     if (this.locked) return;
 
     this.zoomOffset = THREE.MathUtils.lerp(this.zoomOffset, this.zoomTarget, 0.1);
+
+    if (this.experience.device.isMobileDevice) {
+      this.targetPosition.set(
+        this.basePosition.x,
+        this.basePosition.y,
+        this.basePosition.z,
+      );
+      this.instance.getWorldDirection(this._zoomDir);
+      this.targetPosition.addScaledVector(this._zoomDir, this.zoomOffset);
+      this.instance.position.lerp(this.targetPosition, 0.15);
+      return;
+    }
 
     const mouse = this.experience.mouse.instance;
 

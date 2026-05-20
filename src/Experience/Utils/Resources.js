@@ -4,6 +4,9 @@ import { EventEmitter } from "events";
 import { Loaders } from "./Loaders";
 import assets from "./assets";
 
+const BATCH_SIZE = 4;
+const BATCH_DELAY = 150; // ms between batches
+
 export class Resources extends EventEmitter {
   constructor() {
     super();
@@ -19,7 +22,18 @@ export class Resources extends EventEmitter {
   }
 
   startLoading() {
-    for (const asset of this.assets) {
+    const batches = [];
+    for (let i = 0; i < this.assets.length; i += BATCH_SIZE) {
+      batches.push(this.assets.slice(i, i + BATCH_SIZE));
+    }
+
+    batches.forEach((batch, i) => {
+      setTimeout(() => this._loadBatch(batch), i * BATCH_DELAY);
+    });
+  }
+
+  _loadBatch(batch) {
+    for (const asset of batch) {
       if (asset.type === "glbModel") {
         this.loaders.gltfLoader.load(asset.path, (file) => {
           this.singleAssetLoaded(asset.name, file);

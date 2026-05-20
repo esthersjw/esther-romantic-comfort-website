@@ -1,4 +1,4 @@
-@import './styles/fonts.css';
+@import "./styles/fonts.css";
 
 * {
   margin: 0;
@@ -44,7 +44,10 @@ body {
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s, background 0.2s, transform 0.15s;
+  transition:
+    opacity 0.3s,
+    background 0.2s,
+    transform 0.15s;
 }
 
 .back-btn--visible {
@@ -77,7 +80,9 @@ body {
   letter-spacing: 0.04em;
   cursor: pointer;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
-  transition: background 0.2s, transform 0.15s;
+  transition:
+    background 0.2s,
+    transform 0.15s;
 }
 
 .day-night-btn:hover {
@@ -90,50 +95,86 @@ body {
   line-height: 1;
 }
 
-/* Modals */
-.modal {
+/* Cursor-tracking tooltip (characters view) */
+.cursor-tooltip {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 300px;
-  height: 200px;
-  z-index: 10;
-  background-color: black;
-  color: white;
+  z-index: 300;
+  pointer-events: none;
+  user-select: none;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 12px;
+  font-family: sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: rgba(15, 15, 20, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 5px 10px;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(107, 107, 107, 0.192);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   opacity: 0;
   pointer-events: none;
 }
 
-.modal-open {
-  pointer-events: auto;
-}
-
-.modal__wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  gap: 24px;
-  width: 100%;
-  height: 100%;
-  padding: 10px;
-}
-
-.modal__title {
-}
-
-.modal__paragraph {
+/* Modal card */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(480px, 88vw);
+  z-index: 201;
+  background: rgba(20, 20, 28, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  color: #fff;
+  padding: 44px 40px 40px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .modal__close-button {
   position: absolute;
-  left: 12px;
-  top: 12px;
+  top: 16px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s;
 }
 
 .modal__close-button:hover {
-  cursor: pointer;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.modal__title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  font-family: sans-serif;
+  margin-bottom: 14px;
+}
+
+.modal__paragraph {
+  font-size: 15px;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.72);
+  font-family: sans-serif;
 }
 
 /* Preloader */

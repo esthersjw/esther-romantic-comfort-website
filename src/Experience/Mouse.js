@@ -17,15 +17,5 @@ export class Mouse {
       this.instance.x = (e.clientX / window.innerWidth) * 2 - 1;
       this.instance.y = -(e.clientY / window.innerHeight) * 2 + 1;
     });
-    window.addEventListener("touchmove", (e) => {
-      const touch = e.touches[0];
-      this.instance.x = (touch.clientX / window.innerWidth) * 2 - 1;
-      this.instance.y = -(touch.clientY / window.innerHeight) * 2 + 1;
-    });
-    window.addEventListener("touchstart", (e) => {
-      const touch = e.touches[0];
-      this.instance.x = (touch.clientX / window.innerWidth) * 2 - 1;
-      this.instance.y = -(touch.clientY / window.innerHeight) * 2 + 1;
-    });
   }
 }

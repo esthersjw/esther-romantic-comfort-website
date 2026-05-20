@@ -26,8 +26,9 @@ export class Room {
     this.model = this.experience.resources.items.room.scene;
     this.goboTex = this.experience.resources.items.goboTexture;
     this.goboTex.colorSpace = THREE.NoColorSpace;
-    this.goboTex.generateMipmaps = false;
-    this.goboTex.minFilter = THREE.LinearFilter;
+    this.goboTex.generateMipmaps = true;
+    this.goboTex.minFilter = THREE.LinearMipmapLinearFilter;
+    this.goboTex.anisotropy = 16;
     this.goboTex.needsUpdate = true;
     this.init();
   }
@@ -71,8 +72,9 @@ export class Room {
     ].forEach((t) => {
       if (t) {
         t.flipY = false;
-        t.generateMipmaps = false;
-        t.minFilter = THREE.LinearFilter;
+        t.generateMipmaps = true;
+        t.minFilter = THREE.LinearMipmapLinearFilter;
+        t.anisotropy = 16;
       }
     });
 
@@ -192,8 +194,10 @@ export class Room {
       const goboSample3 = select(inFrustum3, blurGobo(distortedUV3), vec3(1.0));
       const softGobo3 = goboSample3.oneMinus().mul(uGoboStrength).oneMinus();
 
-      const ordinalTex = ordinalTextureMap[obj.name.split("_")[0]];
-      const ordinalNightTex = ordinalNightTextureMap[obj.name.split("_")[0]];
+      const ordinal = obj.name.split("_")[0];
+      const ordinalTex = ordinalTextureMap[ordinal];
+      const ordinalNightTex = ordinalNightTextureMap[ordinal];
+      const alphaTest = ordinal === "Fourth" ? 0.5 : 0.2;
       if (ordinalTex && ordinalNightTex) {
         const daySample = texture(ordinalTex, uv());
         const nightSample = texture(ordinalNightTex, uv());
@@ -201,7 +205,7 @@ export class Room {
         mat.colorNode = blended.rgb.mul(softGobo.min(softGobo2).min(softGobo3));
         mat.opacityNode = blended.a;
         mat.transparent = true;
-        mat.alphaTest = 0.2;
+        mat.alphaTest = alphaTest;
       } else if (ordinalTex) {
         const texSample = texture(ordinalTex, uv());
         mat.colorNode = texSample.rgb.mul(
@@ -209,7 +213,7 @@ export class Room {
         );
         mat.opacityNode = texSample.a;
         mat.transparent = true;
-        mat.alphaTest = 0.2;
+        mat.alphaTest = alphaTest;
       } else if (old.map) {
         mat.colorNode = texture(old.map, uv()).mul(
           softGobo.min(softGobo2).min(softGobo3),
