@@ -20,6 +20,8 @@ This repo contains code of John and Patricia's comfort website for couples thera
 - [Hiking calendar image one](https://www.outsideonline.com/adventure-travel/destinations/10-most-beautiful-hikes-world/)
 - [Hiking calendar image two](https://57hours.com/best-of/best-hikes-in-europe/)
 - [Flowmery Font](https://www.1001fonts.com/flowmery-font.html)
+- [Ivy and leaves from Botaniq](https://polygoniq.com/3d/botaniq/)
+- [Cardboard texture from SouthernShotty](https://superhivemarket.com/products/crafty-asset-pack)
 
 # Extra info
 
