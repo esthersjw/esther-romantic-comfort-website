@@ -60,6 +60,11 @@ export default [
     path: "/textures/day/eighth-decor_lol_CyclesBake_COMBINED.webp",
   },
   {
+    name: "ninthTexture",
+    type: "texture",
+    path: "/textures/day/ninth-attachment_lol_CyclesBake_COMBINED.webp",
+  },
+  {
     name: "firstNightTexture",
     type: "texture",
     path: "/textures/night/first-house_night_CyclesBake_COMBINED.webp",
@@ -98,6 +103,11 @@ export default [
     name: "eighthNightTexture",
     type: "texture",
     path: "/textures/night/eighth-decor_night_CyclesBake_COMBINED.webp",
+  },
+  {
+    name: "ninthNightTexture",
+    type: "texture",
+    path: "/textures/night/ninth-attachment_night_CyclesBake_COMBINED.webp",
   },
   // {
   //   name: "skybox",

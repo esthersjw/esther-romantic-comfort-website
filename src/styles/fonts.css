@@ -1,0 +1,9 @@
+@font-face {
+  font-family: "Flowmery";
+  src:
+    url("/fonts/Flowmery-Regular.woff2") format("woff2"),
+    url("/fonts/Flowmery-Regular.woff") format("woff");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}

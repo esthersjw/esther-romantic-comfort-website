@@ -51,6 +51,7 @@ export class Room {
       Sixth: items.sixthTexture,
       Seventh: items.seventhTexture,
       Eighth: items.eighthTexture,
+      Ninth: items.ninthTexture,
     };
     const ordinalNightTextureMap = {
       First: items.firstNightTexture,
@@ -61,9 +62,13 @@ export class Room {
       Sixth: items.sixthNightTexture,
       Seventh: items.seventhNightTexture,
       Eighth: items.eighthNightTexture,
+      Ninth: items.ninthNightTexture,
     };
 
-    [...Object.values(ordinalTextureMap), ...Object.values(ordinalNightTextureMap)].forEach((t) => {
+    [
+      ...Object.values(ordinalTextureMap),
+      ...Object.values(ordinalNightTextureMap),
+    ].forEach((t) => {
       if (t) {
         t.flipY = false;
         t.generateMipmaps = false;
@@ -199,14 +204,16 @@ export class Room {
         mat.alphaTest = 0.2;
       } else if (ordinalTex) {
         const texSample = texture(ordinalTex, uv());
-        mat.colorNode = texSample.rgb
-          .mul(softGobo.min(softGobo2).min(softGobo3));
+        mat.colorNode = texSample.rgb.mul(
+          softGobo.min(softGobo2).min(softGobo3),
+        );
         mat.opacityNode = texSample.a;
         mat.transparent = true;
         mat.alphaTest = 0.2;
       } else if (old.map) {
-        mat.colorNode = texture(old.map, uv())
-          .mul(softGobo.min(softGobo2).min(softGobo3));
+        mat.colorNode = texture(old.map, uv()).mul(
+          softGobo.min(softGobo2).min(softGobo3),
+        );
       } else {
         mat.color.copy(old.color);
       }

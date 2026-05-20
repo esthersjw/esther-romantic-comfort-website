@@ -37,8 +37,8 @@ export class Renderer {
 
     // Vignette uniforms
     this.uVignetteAmount = uniform(1.0);
-    this.uVignetteStrength = uniform(0.5);
-    this.uVignetteRadius = uniform(0.8);
+    this.uVignetteStrength = uniform(0.55);
+    this.uVignetteRadius = uniform(0.75);
     this.uVignetteSoftness = uniform(0.33);
 
     const scenePass = pass(
@@ -80,8 +80,8 @@ export class Renderer {
 
     const vignetteParams = {
       enabled: true,
-      strength: 0.5,
-      radius: 0.8,
+      strength: 0.55,
+      radius: 0.75,
       softness: 0.33,
     };
 
