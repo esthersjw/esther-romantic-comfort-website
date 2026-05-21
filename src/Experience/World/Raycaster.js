@@ -64,6 +64,9 @@ export class Raycaster {
     this._flipIndices = new Map();
     this._textsMesh = null;
     this._savedHouseDragX = null;
+    this._markersVisible = false;
+    this._markerData = null;
+    this._markersContainer = null;
 
     this.backBtn = document.getElementById("back-btn");
     this._createDragHint();
@@ -80,6 +83,7 @@ export class Raycaster {
     });
 
     this.loadHitboxes();
+    this._createHitboxMarkers();
     this.init();
   }
 
@@ -808,6 +812,79 @@ export class Raycaster {
     });
   }
 
+  _createHitboxMarkers() {
+    const LABELS = {
+      Photos_Raycaster_Hitbox: "Photos",
+      Calendar_Raycaster_Hitbox: "Needs & Intimacy Calendar",
+      Characters_Raycaster_Hitbox: "Character Attachment Styles",
+      House_Raycaster_Hitbox: "Learning Attachment Styles",
+      Music_Raycaster_Hitbox: "Music",
+    };
+
+    this._markersContainer = document.createElement("div");
+    this._markersContainer.id = "hitbox-markers";
+    document.body.appendChild(this._markersContainer);
+    gsap.set(this._markersContainer, { opacity: 0 });
+
+    this._markerData = [];
+
+    this.meshes.forEach((mesh) => {
+      const label = LABELS[mesh.name];
+      if (!label) return;
+
+      mesh.updateWorldMatrix(true, false);
+      const box = new THREE.Box3().setFromObject(mesh);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      const el = document.createElement("div");
+      el.className = "hitbox-marker";
+      el.innerHTML = `<div class="hitbox-marker__diamond"></div><span class="hitbox-marker__label">${label}</span>`;
+      this._markersContainer.appendChild(el);
+
+      this._markerData.push({ center, el });
+    });
+  }
+
+  showHitboxMarkers() {
+    if (!this._markerData?.length) return;
+    this._markersVisible = true;
+    gsap.killTweensOf(this._markersContainer);
+    gsap.to(this._markersContainer, {
+      opacity: 1,
+      duration: 0.3,
+      ease: "power2.out",
+    });
+  }
+
+  hideHitboxMarkers() {
+    if (!this._markersContainer) return;
+    this._markersVisible = false;
+    gsap.killTweensOf(this._markersContainer);
+    gsap.to(this._markersContainer, {
+      opacity: 0,
+      duration: 0.2,
+      ease: "power2.in",
+    });
+  }
+
+  _updateMarkerPositions() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const vec = new THREE.Vector3();
+
+    this._markerData.forEach(({ center, el }) => {
+      vec.copy(center).project(this.camera);
+      if (vec.z > 1) {
+        el.style.visibility = "hidden";
+        return;
+      }
+      el.style.visibility = "visible";
+      el.style.left = `${(vec.x * 0.5 + 0.5) * width}px`;
+      el.style.top = `${(-vec.y * 0.5 + 0.5) * height}px`;
+    });
+  }
+
   toggleMusic() {
     const isNight = this.experience.world.room?.isNight ?? false;
     const targetVolume = isNight ? 0.25 : 1;
@@ -932,5 +1009,7 @@ export class Raycaster {
       if (text) this._showHoverLabel(text);
       else this._hideHoverLabel();
     }
+
+    if (this._markersVisible) this._updateMarkerPositions();
   }
 }

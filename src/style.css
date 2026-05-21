@@ -309,6 +309,68 @@ body {
   background: rgba(196, 168, 130, 0.15);
 }
 
+/* Hitbox markers (shown on info button hover) */
+#hitbox-markers {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.hitbox-marker {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  transform: translate(-50%, -50%);
+}
+
+.hitbox-marker__diamond {
+  width: 10px;
+  height: 10px;
+  background: #c4a882;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.hitbox-marker__diamond::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background: rgba(245, 236, 215, 0.45);
+}
+
+.hitbox-marker__diamond::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 1px solid rgba(196, 168, 130, 0.7);
+  animation: marker-pulse 1.8s ease-out infinite;
+}
+
+@keyframes marker-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+.hitbox-marker__label {
+  font-size: 11px;
+  font-family: "Lora", Georgia, serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(245, 236, 215, 0.95);
+  white-space: nowrap;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.55);
+}
+
 @media (max-width: 768px) {
   .top-right-controls {
     right: 18px;
