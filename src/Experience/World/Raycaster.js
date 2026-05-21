@@ -822,7 +822,7 @@ export class Raycaster {
     };
 
     const Y_OFFSETS = {
-      Characters_Raycaster_Hitbox: -55,
+      Characters_Raycaster_Hitbox: -65,
     };
 
     this._markersContainer = document.createElement("div");
@@ -842,7 +842,8 @@ export class Raycaster {
       box.getCenter(center);
 
       const el = document.createElement("div");
-      el.className = "hitbox-marker";
+      const labelAbove = mesh.name === "Characters_Raycaster_Hitbox";
+      el.className = "hitbox-marker" + (labelAbove ? " hitbox-marker--label-above" : "");
       el.innerHTML = `<div class="hitbox-marker__diamond"></div><span class="hitbox-marker__label">${label}</span>`;
       this._markersContainer.appendChild(el);
 

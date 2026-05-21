@@ -326,6 +326,10 @@ body {
   transform: translate(-50%, -50%);
 }
 
+.hitbox-marker--label-above {
+  flex-direction: column-reverse;
+}
+
 .hitbox-marker__diamond {
   width: 10px;
   height: 10px;
