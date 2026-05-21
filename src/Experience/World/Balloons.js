@@ -7,13 +7,13 @@ const ANCHOR = new THREE.Vector3(-1.357, 1.964, -26.582);
 
 const BALLOON_RADIUS = 0.35;
 const COLLISION_DIST = BALLOON_RADIUS * 2.4;
-const STRING_LENGTH  = 2.8;
+const STRING_LENGTH = 2.8;
 const STRING_SEGMENTS = 14;
 
-const SPRING_K    = 3.5;
+const SPRING_K = 3.5;
 const REPULSION_K = 10.0;
-const DAMPING     = 1.8;
-const WIND_STR    = 0.55;
+const DAMPING = 1.8;
+const WIND_STR = 0.55;
 
 const COLORS = ["#FF3B30", "#007AFF", "#FFCC00", "#34C759", "#FF2D92"];
 const PHASES = [0.0, 1.3, 2.6, 0.9, 2.0];
@@ -82,7 +82,11 @@ export class Balloons {
     });
     knotMat.lightsNode = this._lightsNode;
     const knot = new THREE.Mesh(knotGeo, knotMat);
-    knot.position.set(startPos.x, startPos.y - BALLOON_RADIUS * 1.25, startPos.z);
+    knot.position.set(
+      startPos.x,
+      startPos.y - BALLOON_RADIUS * 1.25,
+      startPos.z,
+    );
     this.group.add(knot);
 
     // String
@@ -108,11 +112,13 @@ export class Balloons {
     const mid = from.clone().lerp(to, 0.5);
     mid.x += lateralOffset.x * 0.35;
     mid.z += lateralOffset.z * 0.35;
-    return new THREE.CatmullRomCurve3([from, mid, to]).getPoints(STRING_SEGMENTS);
+    return new THREE.CatmullRomCurve3([from, mid, to]).getPoints(
+      STRING_SEGMENTS,
+    );
   }
 
   update() {
-    const t  = this.experience.time.elapsed * 0.001;
+    const t = this.experience.time.elapsed * 0.001;
     const dt = Math.min(this.experience.time.delta * 0.001, 0.033);
 
     const forces = this.balloons.map(() => new THREE.Vector3());
@@ -133,7 +139,7 @@ export class Balloons {
         if (dist < COLLISION_DIST && dist > 0.001) {
           const mag = (COLLISION_DIST - dist) * REPULSION_K;
           diff.normalize();
-          forces[i].addScaledVector(diff,  mag);
+          forces[i].addScaledVector(diff, mag);
           forces[j].addScaledVector(diff, -mag);
         }
       }

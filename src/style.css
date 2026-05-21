@@ -254,6 +254,61 @@ body {
   transition: width 0.3s ease;
 }
 
+.preloader__intro {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  max-width: 440px;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.preloader__description {
+  font-size: 15px;
+  line-height: 1.9;
+  color: rgba(92, 61, 46, 0.78);
+  letter-spacing: 0.01em;
+}
+
+.preloader__buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.preloader__btn {
+  padding: 11px 28px;
+  border-radius: 3px;
+  font-size: 13px;
+  font-family: "Lora", Georgia, serif;
+  letter-spacing: 0.07em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.preloader__btn--primary {
+  background: #8b9d77;
+  color: #fff;
+  border: none;
+}
+
+.preloader__btn--primary:hover {
+  background: #7a8c68;
+}
+
+.preloader__btn--secondary {
+  background: transparent;
+  color: #5c3d2e;
+  border: 1.5px solid #c4a882;
+}
+
+.preloader__btn--secondary:hover {
+  background: rgba(196, 168, 130, 0.15);
+}
+
 @media (max-width: 768px) {
   .top-right-controls {
     right: 18px;
