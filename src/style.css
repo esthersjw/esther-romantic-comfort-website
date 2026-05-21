@@ -152,12 +152,37 @@ body {
   pointer-events: none;
 }
 
+/* Modal scrollbar */
+.modal::-webkit-scrollbar {
+  width: 3px;
+}
+
+.modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal::-webkit-scrollbar-button {
+  display: none;
+}
+
+.modal::-webkit-scrollbar-thumb {
+  background: rgba(196, 168, 130, 0.5);
+  border-radius: 2px;
+}
+
+.modal {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 168, 130, 0.5) transparent;
+}
+
 /* Modal card */
 .modal {
   position: fixed;
   top: 50%;
   left: 50%;
   width: min(480px, 88vw);
+  max-height: 85vh;
+  overflow-y: auto;
   z-index: 201;
   background: #f5ecd7;
   border: 2px solid #c4a882;
