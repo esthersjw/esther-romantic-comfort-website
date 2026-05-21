@@ -821,6 +821,10 @@ export class Raycaster {
       Music_Raycaster_Hitbox: "Music",
     };
 
+    const Y_OFFSETS = {
+      Characters_Raycaster_Hitbox: -55,
+    };
+
     this._markersContainer = document.createElement("div");
     this._markersContainer.id = "hitbox-markers";
     document.body.appendChild(this._markersContainer);
@@ -842,7 +846,8 @@ export class Raycaster {
       el.innerHTML = `<div class="hitbox-marker__diamond"></div><span class="hitbox-marker__label">${label}</span>`;
       this._markersContainer.appendChild(el);
 
-      this._markerData.push({ center, el });
+      const yOffset = Y_OFFSETS[mesh.name] ?? 0;
+      this._markerData.push({ center, el, yOffset });
     });
   }
 
@@ -873,7 +878,7 @@ export class Raycaster {
     const height = window.innerHeight;
     const vec = new THREE.Vector3();
 
-    this._markerData.forEach(({ center, el }) => {
+    this._markerData.forEach(({ center, el, yOffset }) => {
       vec.copy(center).project(this.camera);
       if (vec.z > 1) {
         el.style.visibility = "hidden";
@@ -881,7 +886,7 @@ export class Raycaster {
       }
       el.style.visibility = "visible";
       el.style.left = `${(vec.x * 0.5 + 0.5) * width}px`;
-      el.style.top = `${(-vec.y * 0.5 + 0.5) * height}px`;
+      el.style.top = `${(-vec.y * 0.5 + 0.5) * height + yOffset}px`;
     });
   }
 
