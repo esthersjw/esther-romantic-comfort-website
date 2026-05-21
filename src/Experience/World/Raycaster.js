@@ -853,7 +853,7 @@ export class Raycaster {
   }
 
   showHitboxMarkers() {
-    if (!this._markerData?.length) return;
+    if (!this._markerData?.length || this.inFocus) return;
     this._markersVisible = true;
     gsap.killTweensOf(this._markersContainer);
     gsap.to(this._markersContainer, {
