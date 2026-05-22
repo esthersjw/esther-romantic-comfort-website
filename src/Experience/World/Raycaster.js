@@ -552,7 +552,6 @@ export class Raycaster {
     this._wasDrag = false;
 
     this._attachmentMeshes = [];
-    this._attachmentFlipState = {};
     this._hoveredAttachmentMesh = null;
     this._flipProxies = new Map();
     this._flipIndices = new Map();
@@ -566,11 +565,15 @@ export class Raycaster {
         ) {
           this._attachmentMeshes.push(child);
           const flipIdx = child.morphTargetDictionary?.["Flip"];
-          const proxy = { value: 0 };
+          const isFlipped = this._attachmentFlipState[child.name] ?? false;
+          if (!(child.name in this._attachmentFlipState)) {
+            this._attachmentFlipState[child.name] = false;
+          }
+          const startValue = isFlipped ? 1.0 : 0;
+          const proxy = { value: startValue };
           this._flipProxies.set(child, proxy);
           this._flipIndices.set(child, flipIdx);
-          if (flipIdx !== undefined) child.morphTargetInfluences[flipIdx] = 0;
-          this._attachmentFlipState[child.name] = false;
+          if (flipIdx !== undefined) child.morphTargetInfluences[flipIdx] = startValue;
         }
         if (child.isMesh && child.name === "Ninth_Attachment_Texts") {
           this._textsMesh = child;
@@ -677,7 +680,6 @@ export class Raycaster {
     this._houseDragTargetX = HOUSE_POS.x;
     this._dragHint.classList.remove("visible");
     this._attachmentMeshes = [];
-    this._attachmentFlipState = {};
     this._hoveredAttachmentMesh = null;
     this._flipProxies = new Map();
     this._flipIndices = new Map();
