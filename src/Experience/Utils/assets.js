@@ -1,3 +1,9 @@
+const isIOS =
+  /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+const ext = isIOS ? "ktx2" : "webp";
+
 export default [
   {
     name: "room",
@@ -21,93 +27,93 @@ export default [
   },
   {
     name: "firstTexture",
-    type: "texture",
-    path: "/textures/day/first-house_day.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/day/first-house_day.${ext}`,
   },
   {
     name: "secondTexture",
-    type: "texture",
-    path: "/textures/day/second-photos_day.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/day/second-photos_day.${ext}`,
   },
   {
     name: "thirdTexture",
-    type: "texture",
-    path: "/textures/day/third-desk_day.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/day/third-desk_day.${ext}`,
   },
   {
     name: "fourthTexture",
-    type: "texture",
-    path: "/textures/day/fourth-extras_day.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/day/fourth-extras_day.${ext}`,
   },
   {
     name: "fifthTexture",
-    type: "texture",
-    path: "/textures/day/fifth-background_day.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/day/fifth-background_day.${ext}`,
   },
   {
     name: "sixthTexture",
-    type: "texture",
-    path: "/textures/day/sixth-plants_day.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/day/sixth-plants_day.${ext}`,
   },
   {
     name: "seventhTexture",
-    type: "texture",
-    path: "/textures/day/seventh-large-stuff_day.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/day/seventh-large-stuff_day.${ext}`,
   },
   {
     name: "eighthTexture",
-    type: "texture",
-    path: "/textures/day/eighth-decor_day.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/day/eighth-decor_day.${ext}`,
   },
   {
     name: "ninthTexture",
-    type: "texture",
-    path: "/textures/day/ninth-attachment_day.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/day/ninth-attachment_day.${ext}`,
   },
   {
     name: "firstNightTexture",
-    type: "texture",
-    path: "/textures/night/first-house_night.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/night/first-house_night.${ext}`,
   },
   {
     name: "secondNightTexture",
-    type: "texture",
-    path: "/textures/night/second-photos_night.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/night/second-photos_night.${ext}`,
   },
   {
     name: "thirdNightTexture",
-    type: "texture",
-    path: "/textures/night/third-desk_night.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/night/third-desk_night.${ext}`,
   },
   {
     name: "fourthNightTexture",
-    type: "texture",
-    path: "/textures/night/fourth-extras_night.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/night/fourth-extras_night.${ext}`,
   },
   {
     name: "fifthNightTexture",
-    type: "texture",
-    path: "/textures/night/fifth-background_night.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/night/fifth-background_night.${ext}`,
   },
   {
     name: "sixthNightTexture",
-    type: "texture",
-    path: "/textures/night/sixth-plants_night.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/night/sixth-plants_night.${ext}`,
   },
   {
     name: "seventhNightTexture",
-    type: "texture",
-    path: "/textures/night/seventh-large-stuff_night.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/night/seventh-large-stuff_night.${ext}`,
   },
   {
     name: "eighthNightTexture",
-    type: "texture",
-    path: "/textures/night/eighth-decor_night.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/night/eighth-decor_night.${ext}`,
   },
   {
     name: "ninthNightTexture",
-    type: "texture",
-    path: "/textures/night/ninth-attachment_night.webp",
+    type: isIOS ? "ktx2" : "texture",
+    path: `/textures/night/ninth-attachment_night.${ext}`,
   },
   // {
   //   name: "skybox",

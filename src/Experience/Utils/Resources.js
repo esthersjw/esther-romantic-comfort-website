@@ -47,6 +47,11 @@ export class Resources extends EventEmitter {
           file.colorSpace = THREE.SRGBColorSpace;
           this.singleAssetLoaded(asset.name, file);
         });
+      } else if (asset.type === "ktx2") {
+        this.loaders.ktx2Loader.load(asset.path, (file) => {
+          file.colorSpace = THREE.SRGBColorSpace;
+          this.singleAssetLoaded(asset.name, file);
+        });
       }
     }
   }
