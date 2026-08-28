@@ -109,6 +109,7 @@ export class Raycaster {
 
   update() {
     if (!this.enabled) return;
+    if (!this.meshes.length) return;
     if (this.isModalOpen) {
       if (this.hoveredObject) {
         document.body.style.cursor = "default";

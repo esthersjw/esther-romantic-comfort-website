@@ -28,12 +28,14 @@ export class Modal {
   }
 
   open(title, text) {
+    this._el.classList.remove("modal--vr");
     this._el.querySelector(".modal__title").textContent = title;
     this._el.querySelector(".modal__paragraph").textContent = text;
     this._show();
   }
 
   openHTML(title, html) {
+    this._el.classList.remove("modal--vr");
     this._el.querySelector(".modal__title").textContent = title;
     this._el.querySelector(".modal__paragraph").innerHTML = html;
     this._show();

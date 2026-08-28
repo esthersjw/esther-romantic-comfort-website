@@ -3,6 +3,7 @@ const isIOS =
   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
 const ext = isIOS ? "ktx2" : "webp";
+const customTextureVersion = "?v=wedding-20260828-37";
 
 export default [
   {
@@ -21,6 +22,21 @@ export default [
     path: "/textures/gobo.jpg",
   },
   {
+    name: "catStickerDoor",
+    type: "texture",
+    path: `/textures/cat-sticker-door-white-outline.png${customTextureVersion}`,
+  },
+  {
+    name: "catStickerLying",
+    type: "texture",
+    path: `/textures/cat-sticker-lying-white-outline.png${customTextureVersion}`,
+  },
+  {
+    name: "catStickerSitting",
+    type: "texture",
+    path: `/textures/cat-sticker-sitting-white-outline.png${customTextureVersion}`,
+  },
+  {
     name: "butterflyWingTexture",
     type: "texture",
     path: "/textures/butterfly_wing.webp",
@@ -33,7 +49,7 @@ export default [
   {
     name: "secondTexture",
     type: isIOS ? "ktx2" : "texture",
-    path: `/textures/day/second-photos_day.${ext}`,
+    path: `/textures/day/second-photos_day.${ext}${customTextureVersion}`,
   },
   {
     name: "thirdTexture",
@@ -42,13 +58,13 @@ export default [
   },
   {
     name: "fourthTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/day/fourth-extras_day.${ext}`,
+    type: "texture",
+    path: `/textures/day/fourth-extras_day.webp${customTextureVersion}`,
   },
   {
     name: "fifthTexture",
     type: isIOS ? "ktx2" : "texture",
-    path: `/textures/day/fifth-background_day.${ext}`,
+    path: `/textures/day/fifth-background_day.${ext}${customTextureVersion}`,
   },
   {
     name: "sixthTexture",
@@ -68,7 +84,7 @@ export default [
   {
     name: "ninthTexture",
     type: isIOS ? "ktx2" : "texture",
-    path: `/textures/day/ninth-attachment_day.${ext}`,
+    path: `/textures/day/ninth-attachment_day.${ext}${customTextureVersion}`,
   },
   {
     name: "firstNightTexture",
@@ -78,7 +94,7 @@ export default [
   {
     name: "secondNightTexture",
     type: isIOS ? "ktx2" : "texture",
-    path: `/textures/night/second-photos_night.${ext}`,
+    path: `/textures/night/second-photos_night.${ext}${customTextureVersion}`,
   },
   {
     name: "thirdNightTexture",
@@ -87,13 +103,13 @@ export default [
   },
   {
     name: "fourthNightTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/night/fourth-extras_night.${ext}`,
+    type: "texture",
+    path: `/textures/night/fourth-extras_night.webp${customTextureVersion}`,
   },
   {
     name: "fifthNightTexture",
     type: isIOS ? "ktx2" : "texture",
-    path: `/textures/night/fifth-background_night.${ext}`,
+    path: `/textures/night/fifth-background_night.${ext}${customTextureVersion}`,
   },
   {
     name: "sixthNightTexture",
@@ -113,7 +129,7 @@ export default [
   {
     name: "ninthNightTexture",
     type: isIOS ? "ktx2" : "texture",
-    path: `/textures/night/ninth-attachment_night.${ext}`,
+    path: `/textures/night/ninth-attachment_night.${ext}${customTextureVersion}`,
   },
   // {
   //   name: "skybox",

@@ -14,6 +14,8 @@ const HOUSE_DRAG_LIMIT = 7;
 const HOUSE_DRAG_SENSITIVITY = 0.02;
 const MESSAGES_POS = { x: 7.869, y: 8.3452, z: -23.766 };
 const MESSAGES_ROT = { x: -Math.PI / 2, y: 0, z: -0.2426 };
+const VR_VIEW_URL =
+  "https://vr.justeasy.cn/view/1ekd17v877934942-1787793519.html";
 
 const CHARACTER_DATA = {
   Fourth_Carl_Raycaster: {
@@ -29,6 +31,11 @@ const CHARACTER_DATA = {
     text: 'Dug is pretty interesting, he seems to have an anxious-preoccupied attachment style by the fact that he forms bonds really quickly given his quote, "My name is Dug. I have just met you, and I love you!" Over the film though, he appears to end with an earned-secure attachment.',
   },
 };
+
+// The original three character meshes belong to the old sticker-board
+// interaction. The wedding board now uses the user's cat stickers instead,
+// so these meshes must not respond to clicks or hover tooltips.
+const DISABLED_STICKER_CHARACTER_NAMES = new Set(Object.keys(CHARACTER_DATA));
 
 let dragHintDismissed = false;
 
@@ -67,6 +74,7 @@ export class Raycaster {
     this._markersVisible = false;
     this._markerData = null;
     this._markersContainer = null;
+    this._vrFrameMesh = null;
 
     this.backBtn = document.getElementById("back-btn");
     this._createDragHint();
@@ -83,8 +91,31 @@ export class Raycaster {
     });
 
     this.loadHitboxes();
+    this._findVrFrameMesh();
     this._createHitboxMarkers();
     this.init();
+  }
+
+  _findVrFrameMesh() {
+    const roomScene = this.experience.world?.room?.model;
+    this._vrFrameMesh = roomScene?.getObjectByName("Fifth_Background_Baked") ?? null;
+  }
+
+  _isVrFrameHit() {
+    if (!this._vrFrameMesh) return false;
+
+    const frameHits = this.raycaster.intersectObject(this._vrFrameMesh);
+    // There can be more than one overlapping wall triangle at the cursor.
+    // Accept the hit when any visible layer maps into the actual frame UV
+    // rectangle, instead of trusting only the nearest triangle.
+    return frameHits.some((hit) => {
+      if (!hit.uv) return false;
+      const { x, y } = hit.uv;
+      // Fifth_Background_Baked uses the same UV orientation as the source
+      // texture. Keep this tightly around the actual wall frame; a mirrored
+      // range would incorrectly include the desk and calendar.
+      return x >= 0.29 && x <= 0.52 && y >= 0.58 && y <= 0.75;
+    });
   }
 
   loadHitboxes() {
@@ -145,6 +176,17 @@ export class Raycaster {
       }
 
       this.raycaster.setFromCamera(this.mouse.instance, this.camera);
+
+      // The room model can finish loading just after Raycaster is created.
+      // Refresh the reference here so the frame remains interactive on the
+      // first real click, even if the initial lookup ran a little too early.
+      if (!this._vrFrameMesh) this._findVrFrameMesh();
+
+      if (this._isVrFrameHit()) {
+        window.open(VR_VIEW_URL, "_blank", "noopener,noreferrer");
+        return;
+      }
+
       const intersects = this.raycaster.intersectObjects(this.meshes);
       if (!intersects.length) return;
 
@@ -298,7 +340,11 @@ export class Raycaster {
     const roomScene = this.experience.world.room?.model;
     if (roomScene) {
       roomScene.traverse((child) => {
-        if (child.isMesh && CHARACTER_DATA[child.name]) {
+        if (
+          child.isMesh &&
+          CHARACTER_DATA[child.name] &&
+          !DISABLED_STICKER_CHARACTER_NAMES.has(child.name)
+        ) {
           this._characterMeshes.push(child);
         }
       });
@@ -948,6 +994,10 @@ export class Raycaster {
           }
           document.body.style.cursor = "default";
         }
+        // The legacy character meshes are no longer interactive. Clear the
+        // canvas cursor too, so hovering the replacement cat stickers never
+        // suggests that they can be clicked.
+        this.canvas.style.cursor = "default";
         return;
       }
 
@@ -1002,7 +1052,11 @@ export class Raycaster {
     this.raycaster.setFromCamera(this.mouse.instance, this.camera);
     const intersects = this.raycaster.intersectObjects(this.meshes);
 
-    document.body.style.cursor = intersects.length ? "pointer" : "default";
+    if (!this._vrFrameMesh) this._findVrFrameMesh();
+    const vrFrameHovered = this._isVrFrameHit();
+    const cursor = intersects.length || vrFrameHovered ? "pointer" : "default";
+    document.body.style.cursor = cursor;
+    this.canvas.style.cursor = cursor;
 
     const hoverName = intersects.length ? intersects[0].object.name : null;
     if (hoverName !== this._currentHoveredName) {

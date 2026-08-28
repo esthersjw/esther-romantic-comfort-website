@@ -195,6 +195,14 @@ export class Room {
       const softGobo3 = goboSample3.oneMinus().mul(uGoboStrength).oneMinus();
 
       const ordinal = obj.name.split("_")[0];
+      // The orange sticker board contains user-supplied transparent stickers.
+      // Keep its baked cardboard shading, but do not project the room's dark
+      // foliage gobo over it; that makes the transparent areas look like
+      // unwanted black sticker backings.
+      const stickerBoardLight =
+        obj.name === "Fourth_Extras_Baked"
+          ? vec3(1.0)
+          : softGobo.min(softGobo2).min(softGobo3);
       const ordinalTex = ordinalTextureMap[ordinal];
       const ordinalNightTex = ordinalNightTextureMap[ordinal];
       const alphaTest = ordinal === "Fourth" ? 0.5 : 0.2;
@@ -202,22 +210,18 @@ export class Room {
         const daySample = texture(ordinalTex, uv());
         const nightSample = texture(ordinalNightTex, uv());
         const blended = mix(daySample, nightSample, this.uDayNight);
-        mat.colorNode = blended.rgb.mul(softGobo.min(softGobo2).min(softGobo3));
+        mat.colorNode = blended.rgb.mul(stickerBoardLight);
         mat.opacityNode = blended.a;
         mat.transparent = true;
         mat.alphaTest = alphaTest;
       } else if (ordinalTex) {
         const texSample = texture(ordinalTex, uv());
-        mat.colorNode = texSample.rgb.mul(
-          softGobo.min(softGobo2).min(softGobo3),
-        );
+        mat.colorNode = texSample.rgb.mul(stickerBoardLight);
         mat.opacityNode = texSample.a;
         mat.transparent = true;
         mat.alphaTest = alphaTest;
       } else if (old.map) {
-        mat.colorNode = texture(old.map, uv()).mul(
-          softGobo.min(softGobo2).min(softGobo3),
-        );
+        mat.colorNode = texture(old.map, uv()).mul(stickerBoardLight);
       } else {
         mat.color.copy(old.color);
       }
@@ -227,6 +231,148 @@ export class Room {
     });
 
     this.experience.scene.add(this.model);
+
+    // The original attachment cards were proportioned for tall human
+    // cut-outs. Widen and separate them so the two horizontal pig drawings
+    // keep their natural proportions without being clipped by the folds.
+    const leftPigCard = this.model.getObjectByName("Ninth_Attachment_Patricia");
+    const rightPigCard = this.model.getObjectByName("Ninth_Attachment_John");
+    if (leftPigCard) {
+      leftPigCard.scale.x *= 2.2;
+      leftPigCard.position.x -= 0.55;
+    }
+    if (rightPigCard) {
+      rightPigCard.scale.x *= 1.75;
+      rightPigCard.position.x += 0.45;
+    }
+
+    // The original scene used these three raycaster meshes as sticker-like
+    // character props. They are no longer part of the wedding board, so hide
+    // them together with the baked sticker artwork above.
+    for (const name of [
+      "Fourth_Carl_Raycaster",
+      "Fourth_Russell_Raycaster",
+      "Fourth_Dug_Raycaster",
+    ]) {
+      const sticker = this.model.getObjectByName(name);
+      if (sticker) sticker.visible = false;
+    }
+
+    // Add the three wedding cat stickers as independent transparent planes on
+    // the clean board. Keeping them separate from the baked atlas means their
+    // edges stay intact and their positions can be adjusted without repainting
+    // the board texture.
+    const catStickerGroup = new THREE.Group();
+    catStickerGroup.name = "Wedding_Cat_Stickers";
+
+    const boardCenter = new THREE.Vector3(-6.0472, -10.6939, -29.82);
+    const boardRight = new THREE.Vector3(3.3353, -0.0075, -0.0707).normalize();
+    const boardDown = new THREE.Vector3(-0.6347, -4.3283, 1.2925).normalize();
+    const boardUp = boardDown.clone().negate();
+    const boardNormal = boardRight.clone().cross(boardUp).normalize();
+    const boardBasis = new THREE.Matrix4().makeBasis(
+      boardRight,
+      boardUp,
+      boardNormal,
+    );
+
+    const addCatSticker = (texture, width, height, x, y) => {
+      if (!texture) return;
+
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.anisotropy = 8;
+      texture.needsUpdate = true;
+
+      const sticker = new THREE.Mesh(
+        new THREE.PlaneGeometry(width, height),
+        new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          alphaTest: 0.02,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+          toneMapped: false,
+        }),
+      );
+      sticker.position.copy(boardCenter)
+        .add(boardRight.clone().multiplyScalar(x))
+        .add(boardUp.clone().multiplyScalar(y))
+        .add(boardNormal.clone().multiplyScalar(0.018));
+      sticker.setRotationFromMatrix(boardBasis);
+      sticker.renderOrder = 10;
+      catStickerGroup.add(sticker);
+    };
+
+    // Spread the three stickers across the board and give each one a little
+    // more presence while keeping a safe margin from the board edges.
+    addCatSticker(items.catStickerDoor, 1.18, 2.33, -1.80, 0.86);
+    addCatSticker(items.catStickerSitting, 1.80, 1.91, 0.98, 0.86);
+    addCatSticker(items.catStickerLying, 1.96, 1.16, 0.0, -1.82);
+    this.experience.scene.add(catStickerGroup);
+
+    // First_House_Baked contains the original John/Patricia lettering as a
+    // small baked wall panel. Remove only that panel's triangles so the
+    // miniature house and desk objects remain intact.
+    const firstHouse = this.model.getObjectByName("First_House_Baked");
+    if (firstHouse?.geometry?.index) {
+      const geometry = firstHouse.geometry;
+      const position = geometry.attributes.position;
+      const sourceIndex = geometry.index.array;
+      const keptIndex = [];
+      const panelMin = new THREE.Vector3(-21.1, 3.4, -2.55);
+      const panelMax = new THREE.Vector3(-16.89, 5.62, -2.46);
+
+      for (let i = 0; i < sourceIndex.length; i += 3) {
+        const triangle = [sourceIndex[i], sourceIndex[i + 1], sourceIndex[i + 2]];
+        let intersectsPanel = true;
+
+        for (const vertexIndex of triangle) {
+          const x = position.getX(vertexIndex);
+          const y = position.getY(vertexIndex);
+          const z = position.getZ(vertexIndex);
+          if (
+            x < panelMin.x ||
+            x > panelMax.x ||
+            y < panelMin.y ||
+            y > panelMax.y ||
+            z < panelMin.z ||
+            z > panelMax.z
+          ) {
+            intersectsPanel = false;
+            break;
+          }
+        }
+
+        if (!intersectsPanel) keptIndex.push(...triangle);
+      }
+
+      geometry.setIndex(keptIndex);
+      geometry.index.needsUpdate = true;
+      geometry.computeBoundingSphere();
+    }
+
+    // Sixth_Plants_Baked also contains the original decorative branch across
+    // the name area. Its triangles occupy a fixed range in the source GLB, so
+    // remove that geometry directly. This stays correct at every aspect ratio,
+    // unlike the old screen-space mask, while preserving the other plants.
+    const plants = this.model.getObjectByName("Sixth_Plants_Baked");
+    if (plants?.geometry?.index) {
+      const geometry = plants.geometry;
+      const sourceIndex = geometry.index.array;
+      const keptIndex = [];
+
+      for (let i = 0; i < sourceIndex.length; i += 3) {
+        const isNameBranch = i >= 879516 && i <= 884349;
+        const isDetachedBranchTip = i === 917103 || i === 917106;
+        if (!isNameBranch && !isDetachedBranchTip) {
+          keptIndex.push(sourceIndex[i], sourceIndex[i + 1], sourceIndex[i + 2]);
+        }
+      }
+
+      geometry.setIndex(keptIndex);
+      geometry.index.needsUpdate = true;
+      geometry.computeBoundingSphere();
+    }
 
     const folder = this.experience.gui.addFolder("Room Gobo Projection");
     folder
