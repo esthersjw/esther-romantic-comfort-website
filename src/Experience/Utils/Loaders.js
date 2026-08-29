@@ -14,7 +14,9 @@ export class Loaders {
     this.loaders = {};
     this.loaders.gltfLoader = new GLTFLoader();
     this.loaders.dracoLoader = new DRACOLoader();
-    this.loaders.dracoLoader.setDecoderPath("/draco/");
+    this.loaders.dracoLoader.setDecoderPath(
+      `${import.meta.env.BASE_URL}draco/`,
+    );
     this.loaders.gltfLoader.setDRACOLoader(this.loaders.dracoLoader);
     this.loaders.imageBitmapLoader = new THREE.ImageBitmapLoader();
     this.loaders.imageBitmapLoader.setOptions({ imageOrientation: "flipY" });
@@ -24,7 +26,9 @@ export class Loaders {
     const experience = Experience.getInstance();
     if (experience.device.isIOS) {
       this.loaders.ktx2Loader = new KTX2Loader();
-      this.loaders.ktx2Loader.setTranscoderPath("/basis/");
+      this.loaders.ktx2Loader.setTranscoderPath(
+        `${import.meta.env.BASE_URL}basis/`,
+      );
       this.loaders.ktx2Loader.detectSupport(experience.renderer.renderer);
     }
   }

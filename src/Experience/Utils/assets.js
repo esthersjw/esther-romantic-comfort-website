@@ -5,7 +5,7 @@ const isIOS =
 const ext = isIOS ? "ktx2" : "webp";
 const customTextureVersion = "?v=wedding-20260829-38";
 
-export default [
+const assets = [
   {
     name: "room",
     type: "glbModel",
@@ -144,3 +144,13 @@ export default [
   //   ],
   // },
 ];
+
+const baseUrl = import.meta.env.BASE_URL;
+
+export default assets.map((asset) => ({
+  ...asset,
+  path:
+    typeof asset.path === "string" && asset.path.startsWith("/")
+      ? `${baseUrl}${asset.path.slice(1)}`
+      : asset.path,
+}));

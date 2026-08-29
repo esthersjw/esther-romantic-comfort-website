@@ -93,7 +93,7 @@ export class Raycaster {
     this.modal = new Modal();
 
     this.music = new Howl({
-      src: ["/audio/music/Married_Life.mp3"],
+      src: [`${import.meta.env.BASE_URL}audio/music/Married_Life.mp3`],
       loop: true,
       volume: 0,
     });
