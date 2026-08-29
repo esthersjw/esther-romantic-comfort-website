@@ -3,7 +3,7 @@ const isIOS =
   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
 const ext = isIOS ? "ktx2" : "webp";
-const customTextureVersion = "?v=wedding-20260828-37";
+const customTextureVersion = "?v=wedding-20260829-38";
 
 export default [
   {

@@ -14,6 +14,12 @@ const HOUSE_DRAG_LIMIT = 7;
 const HOUSE_DRAG_SENSITIVITY = 0.02;
 const MESSAGES_POS = { x: 7.869, y: 8.3452, z: -23.766 };
 const MESSAGES_ROT = { x: -Math.PI / 2, y: 0, z: -0.2426 };
+const FLOORPLAN_TEXTURE_BOUNDS = {
+  minU: 0,
+  maxU: 953 / 4096,
+  minV: 872 / 4096,
+  maxV: 1900 / 4096,
+};
 const VR_VIEW_URL =
   "https://vr.justeasy.cn/view/1ekd17v877934942-1787793519.html";
 
@@ -75,6 +81,8 @@ export class Raycaster {
     this._markerData = null;
     this._markersContainer = null;
     this._vrFrameMesh = null;
+    this._inFloorplanMode = false;
+    this._floorplanReady = false;
 
     this.backBtn = document.getElementById("back-btn");
     this._createDragHint();
@@ -98,24 +106,86 @@ export class Raycaster {
 
   _findVrFrameMesh() {
     const roomScene = this.experience.world?.room?.model;
-    this._vrFrameMesh = roomScene?.getObjectByName("Fifth_Background_Baked") ?? null;
+    this._vrFrameMesh =
+      roomScene?.getObjectByName("Second_Photos_Baked") ?? null;
   }
 
-  _isVrFrameHit() {
-    if (!this._vrFrameMesh) return false;
+  _getVrFrameHit() {
+    if (!this._vrFrameMesh) return null;
 
     const frameHits = this.raycaster.intersectObject(this._vrFrameMesh);
-    // There can be more than one overlapping wall triangle at the cursor.
-    // Accept the hit when any visible layer maps into the actual frame UV
-    // rectangle, instead of trusting only the nearest triangle.
-    return frameHits.some((hit) => {
-      if (!hit.uv) return false;
-      const { x, y } = hit.uv;
-      // Fifth_Background_Baked uses the same UV orientation as the source
-      // texture. Keep this tightly around the actual wall frame; a mirrored
-      // range would incorrectly include the desk and calendar.
-      return x >= 0.29 && x <= 0.52 && y >= 0.58 && y <= 0.75;
-    });
+    return (
+      frameHits.find((hit) => {
+        if (!hit.uv) return false;
+        const { x, y } = hit.uv;
+        return (
+          x >= FLOORPLAN_TEXTURE_BOUNDS.minU &&
+          x <= FLOORPLAN_TEXTURE_BOUNDS.maxU &&
+          y >= FLOORPLAN_TEXTURE_BOUNDS.minV &&
+          y <= FLOORPLAN_TEXTURE_BOUNDS.maxV
+        );
+      }) ?? null
+    );
+  }
+
+  _getFloorplanCenter() {
+    if (!this._vrFrameMesh) return null;
+
+    const geometry = this._vrFrameMesh.geometry;
+    const positions = geometry?.attributes?.position;
+    const uvs = geometry?.attributes?.uv;
+    if (!positions || !uvs) return null;
+
+    const targetU =
+      (FLOORPLAN_TEXTURE_BOUNDS.minU + FLOORPLAN_TEXTURE_BOUNDS.maxU) / 2;
+    const targetV =
+      (FLOORPLAN_TEXTURE_BOUNDS.minV + FLOORPLAN_TEXTURE_BOUNDS.maxV) / 2;
+    const index = geometry.index;
+    const triangleCount = (index?.count ?? positions.count) / 3;
+
+    for (let triangle = 0; triangle < triangleCount; triangle += 1) {
+      const offset = triangle * 3;
+      const ia = index ? index.getX(offset) : offset;
+      const ib = index ? index.getX(offset + 1) : offset + 1;
+      const ic = index ? index.getX(offset + 2) : offset + 2;
+
+      const au = uvs.getX(ia);
+      const av = uvs.getY(ia);
+      const bu = uvs.getX(ib);
+      const bv = uvs.getY(ib);
+      const cu = uvs.getX(ic);
+      const cv = uvs.getY(ic);
+      const denominator = (bv - cv) * (au - cu) + (cu - bu) * (av - cv);
+      if (Math.abs(denominator) < 1e-8) continue;
+
+      const weightA =
+        ((bv - cv) * (targetU - cu) + (cu - bu) * (targetV - cv)) /
+        denominator;
+      const weightB =
+        ((cv - av) * (targetU - cu) + (au - cu) * (targetV - cv)) /
+        denominator;
+      const weightC = 1 - weightA - weightB;
+      const epsilon = -1e-5;
+      if (weightA < epsilon || weightB < epsilon || weightC < epsilon) {
+        continue;
+      }
+
+      const center = new THREE.Vector3(
+        positions.getX(ia) * weightA +
+          positions.getX(ib) * weightB +
+          positions.getX(ic) * weightC,
+        positions.getY(ia) * weightA +
+          positions.getY(ib) * weightB +
+          positions.getY(ic) * weightC,
+        positions.getZ(ia) * weightA +
+          positions.getZ(ib) * weightB +
+          positions.getZ(ic) * weightC,
+      );
+      this._vrFrameMesh.updateWorldMatrix(true, false);
+      return this._vrFrameMesh.localToWorld(center);
+    }
+
+    return null;
   }
 
   loadHitboxes() {
@@ -163,8 +233,6 @@ export class Raycaster {
     );
 
     const handleInteraction = (e) => {
-      if (this.inFocus) return;
-
       if (e.type === "touchend") {
         lastTouchEnd = Date.now();
         if (touchWasDrag) return;
@@ -182,8 +250,21 @@ export class Raycaster {
       // first real click, even if the initial lookup ran a little too early.
       if (!this._vrFrameMesh) this._findVrFrameMesh();
 
-      if (this._isVrFrameHit()) {
-        window.open(VR_VIEW_URL, "_blank", "noopener,noreferrer");
+      const floorplanHit = this._getVrFrameHit();
+
+      if (this.inFocus) {
+        if (
+          this._inFloorplanMode &&
+          this._floorplanReady &&
+          floorplanHit
+        ) {
+          window.location.assign(VR_VIEW_URL);
+        }
+        return;
+      }
+
+      if (floorplanHit) {
+        this.goToFloorplan();
         return;
       }
 
@@ -206,6 +287,61 @@ export class Raycaster {
     this.canvas.addEventListener("click", handleInteraction);
     this.canvas.addEventListener("touchend", handleInteraction);
     this.backBtn.addEventListener("click", () => this.goHome());
+  }
+
+  goToFloorplan() {
+    this.inFocus = true;
+    this._inFloorplanMode = true;
+    this._floorplanReady = false;
+    this.cameraObj.locked = true;
+    this._hideHoverLabel();
+
+    const isNarrow = this.experience.sizes.aspect < 0.75;
+    const cameraDistance = isNarrow ? 11.5 : 8;
+    const floorplanCenter = this._getFloorplanCenter();
+    if (!floorplanCenter) {
+      this.inFocus = false;
+      this._inFloorplanMode = false;
+      this.cameraObj.locked = false;
+      return;
+    }
+    const destination = {
+      x: floorplanCenter.x,
+      y: floorplanCenter.y,
+      z: floorplanCenter.z + cameraDistance,
+    };
+
+    gsap.to(this.cameraObj.instance.position, {
+      ...destination,
+      duration: 2,
+      ease: "power2.inOut",
+    });
+    gsap.to(this.cameraObj.instance.rotation, {
+      x: 0,
+      y: 0,
+      z: 0,
+      duration: 2,
+      ease: "power2.inOut",
+      onComplete: () => {
+        this.cameraObj.basePosition.set(
+          destination.x,
+          destination.y,
+          destination.z,
+        );
+        this.cameraObj.baseRotation.set(0, 0, 0);
+        this.cameraObj.mousePositionStrength = 0;
+        this.cameraObj.mouseRotationStrength = 0;
+        this.cameraObj.locked = false;
+        this._floorplanReady = true;
+        this.backBtn.classList.add("back-btn--visible");
+        gsap.to(this.cameraObj, {
+          mousePositionStrength: 0.25,
+          mouseRotationStrength: 0.005,
+          duration: 0.6,
+          ease: "power2.out",
+        });
+      },
+    });
   }
 
   goToPhotos() {
@@ -823,6 +959,11 @@ export class Raycaster {
       this._messagesBackBtn.classList.remove("back-btn--visible");
     }
     if (this._inCharactersMode) this.disableCharacterInteraction();
+    this._inFloorplanMode = false;
+    this._floorplanReady = false;
+    this._hideHoverLabel();
+    document.body.style.cursor = "default";
+    this.canvas.style.cursor = "default";
     this.disableHouseDrag();
     this.cameraObj.locked = true;
     this.backBtn.classList.remove("back-btn--visible");
@@ -975,6 +1116,20 @@ export class Raycaster {
     }
 
     if (this.inFocus) {
+      if (this._inFloorplanMode) {
+        this.raycaster.setFromCamera(this.mouse.instance, this.camera);
+        if (!this._vrFrameMesh) this._findVrFrameMesh();
+        const floorplanHovered = Boolean(this._getVrFrameHit());
+        const canOpenVr = this._floorplanReady && floorplanHovered;
+        const cursor = canOpenVr ? "pointer" : "default";
+        document.body.style.cursor = cursor;
+        this.canvas.style.cursor = cursor;
+
+        if (canOpenVr) this._showHoverLabel("进入我们的家 · VR");
+        else this._hideHoverLabel();
+        return;
+      }
+
       if (this._inCharactersMode) {
         if (!Modal.anyOpen) {
           this.raycaster.setFromCamera(this.mouse.instance, this.camera);
@@ -1053,12 +1208,16 @@ export class Raycaster {
     const intersects = this.raycaster.intersectObjects(this.meshes);
 
     if (!this._vrFrameMesh) this._findVrFrameMesh();
-    const vrFrameHovered = this._isVrFrameHit();
+    const vrFrameHovered = Boolean(this._getVrFrameHit());
     const cursor = intersects.length || vrFrameHovered ? "pointer" : "default";
     document.body.style.cursor = cursor;
     this.canvas.style.cursor = cursor;
 
-    const hoverName = intersects.length ? intersects[0].object.name : null;
+    const hoverName = vrFrameHovered
+      ? "Floorplan_VR_Frame"
+      : intersects.length
+        ? intersects[0].object.name
+        : null;
     if (hoverName !== this._currentHoveredName) {
       this._currentHoveredName = hoverName;
       const labels = {
@@ -1066,6 +1225,7 @@ export class Raycaster {
         Calendar_Raycaster_Hitbox: "Needs & Intimacy Calendar",
         Characters_Raycaster_Hitbox: "Character Attachment Styles",
         House_Raycaster_Hitbox: "Learning Attachment Styles",
+        Floorplan_VR_Frame: "我们的家 · 点击查看平面图",
       };
       const text = hoverName ? labels[hoverName] : null;
       if (text) this._showHoverLabel(text);
