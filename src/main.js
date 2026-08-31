@@ -23,13 +23,3 @@ infoBtn.addEventListener("click", () => {
 Click around to explore!! For a full set of credits, see the <a href="https://github.com/andrewwoan/john-and-patricias-romantic-comfort-website" target="_blank" rel="noopener">GitHub Repository</a> and a <a href="https://www.youtube.com/watch?v=w2MnkhTGJQA" target="_blank" rel="noopener">YouTube tutorial</a> on how to create a comfort website with little technical knowledge required.`,
   );
 });
-
-const btn = document.getElementById("day-night-toggle");
-const icon = btn.querySelector(".day-night-btn__icon");
-
-btn.addEventListener("click", () => {
-  experience.world.room?.toggleDayNight();
-  const goingNight = experience.world.room?.isNight ?? false;
-  icon.innerHTML = goingNight ? "&#9728;" : "&#9790;";
-  experience.world.raycaster?.setDayNightVolume(goingNight);
-});

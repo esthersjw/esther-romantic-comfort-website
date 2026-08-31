@@ -69,35 +69,6 @@ body {
   gap: 10px;
 }
 
-/* Day / Night toggle */
-.day-night-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  border: 1.5px solid #c4a882;
-  border-radius: 3px;
-  background: rgba(245, 236, 215, 0.9);
-  color: #5c3d2e;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(92, 61, 46, 0.2);
-  transition:
-    background 0.2s,
-    transform 0.15s;
-}
-
-.day-night-btn:hover {
-  background: rgba(232, 213, 181, 0.98);
-  transform: scale(1.03);
-}
-
-.day-night-btn__icon {
-  font-size: 18px;
-  line-height: 1;
-}
-
 /* Info button */
 .info-btn {
   display: flex;

@@ -86,51 +86,6 @@ const assets = [
     type: "texture",
     path: `/textures/day/ninth-attachment_day.webp${customTextureVersion}`,
   },
-  {
-    name: "firstNightTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/night/first-house_night.${ext}`,
-  },
-  {
-    name: "secondNightTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/night/second-photos_night.${ext}${customTextureVersion}`,
-  },
-  {
-    name: "thirdNightTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/night/third-desk_night.${ext}`,
-  },
-  {
-    name: "fourthNightTexture",
-    type: "texture",
-    path: `/textures/night/fourth-extras_night.webp${customTextureVersion}`,
-  },
-  {
-    name: "fifthNightTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/night/fifth-background_night.${ext}${customTextureVersion}`,
-  },
-  {
-    name: "sixthNightTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/night/sixth-plants_night.${ext}`,
-  },
-  {
-    name: "seventhNightTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/night/seventh-large-stuff_night.${ext}`,
-  },
-  {
-    name: "eighthNightTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/night/eighth-decor_night.${ext}`,
-  },
-  {
-    name: "ninthNightTexture",
-    type: "texture",
-    path: `/textures/night/ninth-attachment_night.webp${customTextureVersion}`,
-  },
   // {
   //   name: "skybox",
   //   type: "skybox",
