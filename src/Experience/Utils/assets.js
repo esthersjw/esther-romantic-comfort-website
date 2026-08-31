@@ -3,7 +3,7 @@ const isIOS =
   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
 const ext = isIOS ? "ktx2" : "webp";
-const customTextureVersion = "?v=wedding-20260829-38";
+const customTextureVersion = "?v=wedding-20260831-39";
 
 const assets = [
   {
@@ -83,8 +83,8 @@ const assets = [
   },
   {
     name: "ninthTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/day/ninth-attachment_day.${ext}${customTextureVersion}`,
+    type: "texture",
+    path: `/textures/day/ninth-attachment_day.webp${customTextureVersion}`,
   },
   {
     name: "firstNightTexture",
@@ -128,8 +128,8 @@ const assets = [
   },
   {
     name: "ninthNightTexture",
-    type: isIOS ? "ktx2" : "texture",
-    path: `/textures/night/ninth-attachment_night.${ext}${customTextureVersion}`,
+    type: "texture",
+    path: `/textures/night/ninth-attachment_night.webp${customTextureVersion}`,
   },
   // {
   //   name: "skybox",
