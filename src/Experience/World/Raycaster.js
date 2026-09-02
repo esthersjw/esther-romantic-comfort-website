@@ -258,7 +258,9 @@ export class Raycaster {
           this._floorplanReady &&
           floorplanHit
         ) {
-          window.location.assign(VR_VIEW_URL);
+          // Keep the invitation open (and its music playing) while the VR
+          // experience opens separately.
+          window.open(VR_VIEW_URL, "_blank", "noopener,noreferrer");
         }
         return;
       }
